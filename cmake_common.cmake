@@ -33,7 +33,7 @@
 #   dashboard_cvs_tag     = CVS tag to checkout (ex: CMake-2-6)
 #   dashboard_do_coverage = True to enable coverage (ex: gcov)
 #   dashboard_do_memcheck = True to enable memcheck (ex: valgrind)
-#   CTEST_UPDATE_COMMAND  = path to svn command-line client
+#   CTEST_GIT_COMMAND     = path to git command-line client
 #   CTEST_BUILD_FLAGS     = build tool arguments (ex: -j2)
 #   CTEST_DASHBOARD_ROOT  = Where to put source and build trees
 #   CTEST_TEST_CTEST      = Whether to run long CTestTest* tests
@@ -318,6 +318,10 @@ macro(write_cache)
       set(cache_make_program CMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM})
     endif()
   endif()
+  set(cache_git_executable "")
+  if(CTEST_GIT_COMMAND)
+    set(cache_git_executable "GIT_EXECUTABLE:FILEPATH=${CTEST_GIT_COMMAND}")
+  endif()
   file(WRITE ${CTEST_BINARY_DIRECTORY}/CMakeCache.txt "
 SITE:STRING=${CTEST_SITE}
 BUILDNAME:STRING=${CTEST_BUILD_NAME}
@@ -326,6 +330,7 @@ CTEST_USE_LAUNCHERS:BOOL=${CTEST_USE_LAUNCHERS}
 DART_TESTING_TIMEOUT:STRING=${CTEST_TEST_TIMEOUT}
 ${cache_build_type}
 ${cache_make_program}
+${cache_git_executable}
 ${dashboard_cache}
 ")
 endmacro(write_cache)
