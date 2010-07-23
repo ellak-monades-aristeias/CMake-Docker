@@ -38,6 +38,7 @@
 #   CTEST_DASHBOARD_ROOT  = Where to put source and build trees
 #   CTEST_TEST_CTEST      = Whether to run long CTestTest* tests
 #   CTEST_TEST_TIMEOUT    = Per-test timeout length
+#   CTEST_TEST_ARGS       = ctest_test args (ex: PARALLEL_LEVEL 4)
 #   CMAKE_MAKE_PROGRAM    = Path to "make" tool to use
 #
 # Options to configure builds from experimental git repository:
