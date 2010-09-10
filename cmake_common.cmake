@@ -355,6 +355,10 @@ macro(safe_message)
   endif()
 endmacro()
 
+if(COMMAND dashboard_hook_init)
+  dashboard_hook_init()
+endif()
+
 set(dashboard_done 0)
 while(NOT dashboard_done)
   if(dashboard_continuous)
