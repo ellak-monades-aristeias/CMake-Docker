@@ -134,7 +134,10 @@ if(dashboard_use_git_repo)
 
   # Look for a GIT command-line client.
   if(NOT DEFINED CTEST_GIT_COMMAND)
-    find_program(CTEST_GIT_COMMAND NAMES git git.cmd)
+    find_program(CTEST_GIT_COMMAND
+      NAMES git git.cmd
+      PATH_SUFFIXES Git/cmd Git/bin
+      )
   endif()
 
   # Use git only if driving CTest is at least 2.8.0.
