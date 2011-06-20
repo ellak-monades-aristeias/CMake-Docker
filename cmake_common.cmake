@@ -30,7 +30,6 @@
 #   dashboard_binary_name = Name of binary directory (CMake-build)
 #   dashboard_cache       = Initial CMakeCache.txt file content
 #   dashboard_bootstrap   = Bootstrap parallel level (0 to disable)
-#   dashboard_cvs_tag     = CVS tag to checkout (ex: CMake-2-6)
 #   dashboard_do_coverage = True to enable coverage (ex: gcov)
 #   dashboard_do_memcheck = True to enable memcheck (ex: valgrind)
 #   CTEST_GIT_COMMAND     = path to git command-line client
@@ -123,15 +122,6 @@ if(dashboard_use_git_repo)
     endif(UNIX)
   endif()
 
-  # Select CVS source to use.
-  if(NOT DEFINED dashboard_cvs_root)
-    set(dashboard_cvs_root ":pserver:anonymous@cmake.org:/cmake.git")
-  endif()
-  if(NOT DEFINED dashboard_cvs_module)
-    set(dashboard_cvs_module ${dashboard_git_branch})
-  endif()
-  set(dashboard_cvs_tag)
-
   # Look for a GIT command-line client.
   if(NOT DEFINED CTEST_GIT_COMMAND)
     find_program(CTEST_GIT_COMMAND
@@ -146,17 +136,6 @@ if(dashboard_use_git_repo)
   endif()
 else()
   set(CTEST_GIT_COMMAND "")
-endif()
-
-# Select CVS source to use.
-if(NOT DEFINED dashboard_cvs_root)
-  set(dashboard_cvs_root ":pserver:anoncvs@www.cmake.org:/cvsroot/CMake")
-endif()
-if(NOT DEFINED dashboard_cvs_module)
-  set(dashboard_cvs_module CMake)
-endif()
-if(DEFINED dashboard_cvs_tag)
-  set(dashboard_cvs_tag "-r${dashboard_cvs_tag}")
 endif()
 
 # Select a source directory name.
@@ -177,34 +156,11 @@ if(NOT DEFINED CTEST_BINARY_DIRECTORY)
   endif()
 endif()
 
-# Look for a CVS command-line client.
-if(NOT DEFINED CTEST_CVS_COMMAND)
-  find_program(CTEST_CVS_COMMAND cvs)
-endif()
-
-# Set standard CVS update flags.
-if(NOT DEFINED CTEST_CVS_UPDATE_OPTIONS)
-  if(dashboard_cvs_tag)
-    set(CTEST_CVS_UPDATE_OPTIONS "-d -P ${dashboard_cvs_tag}")
-  else()
-    set(CTEST_CVS_UPDATE_OPTIONS "-d -A -P")
-  endif()
-endif()
-
 # Delete source tree if it is incompatible with current VCS.
 if(EXISTS ${CTEST_SOURCE_DIRECTORY})
   if(CTEST_GIT_COMMAND)
     if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git")
       set(vcs_refresh "because it is not managed by git.")
-    endif()
-  elseif(CTEST_CVS_COMMAND)
-    if(EXISTS "${CTEST_SOURCE_DIRECTORY}/CVS/Root")
-      file(STRINGS "${CTEST_SOURCE_DIRECTORY}/CVS/Root" cvsroot LIMIT_COUNT 1)
-    else()
-      set(cvsroot "none")
-    endif()
-    if(NOT "${cvsroot}" STREQUAL "${dashboard_cvs_root}")
-      set(vcs_refresh "because it does not have the correct CVS/Root.")
     endif()
   endif()
   if(vcs_refresh AND "${CTEST_SOURCE_DIRECTORY}" MATCHES "/CMake[^/]*")
@@ -249,9 +205,6 @@ if(EXISTS \"${CTEST_SOURCE_DIRECTORY}/.git\")
 endif()
 ")
     set(CTEST_CHECKOUT_COMMAND "\"${CMAKE_COMMAND}\" -P \"${ctest_checkout_script}\"")
-  elseif(CTEST_CVS_COMMAND)
-    set(CTEST_CHECKOUT_COMMAND
-      "\"${CTEST_CVS_COMMAND}\" -d ${dashboard_cvs_root} co ${dashboard_cvs_tag} -d ${_name} ${dashboard_cvs_module}")
   endif()
   # CTest delayed initialization is broken, so we put the
   # CTestConfig.cmake info here.
@@ -298,7 +251,6 @@ foreach(v
     CTEST_BINARY_DIRECTORY
     CTEST_CMAKE_GENERATOR
     CTEST_BUILD_CONFIGURATION
-    CTEST_CVS_COMMAND
     CTEST_GIT_COMMAND
     CTEST_CHECKOUT_COMMAND
     CTEST_CONFIGURE_COMMAND
