@@ -193,6 +193,17 @@ if(EXISTS ${CTEST_SOURCE_DIRECTORY})
   if(CTEST_GIT_COMMAND)
     if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git")
       set(vcs_refresh "because it is not managed by git.")
+    else()
+      execute_process(
+        COMMAND ${CTEST_GIT_COMMAND} reset --hard
+        WORKING_DIRECTORY "${CTEST_SOURCE_DIRECTORY}"
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output
+        RESULT_VARIABLE failed
+        )
+      if(failed)
+        set(vcs_refresh "because its .git may be corrupted.")
+      endif()
     endif()
   endif()
   if(vcs_refresh AND "${CTEST_SOURCE_DIRECTORY}" MATCHES "/CMake[^/]*")
