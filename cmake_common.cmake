@@ -40,8 +40,7 @@
 #   CTEST_TEST_ARGS       = ctest_test args (ex: PARALLEL_LEVEL 4)
 #   CMAKE_MAKE_PROGRAM    = Path to "make" tool to use
 #
-# Options to configure builds from experimental git repository:
-#   dashboard_use_git_repo = Whether to use experimental git repository
+# Options to configure Git:
 #   dashboard_git_url      = Custom git clone url
 #   dashboard_git_branch   = Custom remote branch to track
 #   dashboard_git_crlf     = Value of core.autocrlf for repository
@@ -87,7 +86,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #=============================================================================
 
-cmake_minimum_required(VERSION 2.6.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.2 FATAL_ERROR)
 
 set(CTEST_PROJECT_NAME CMake)
 set(dashboard_user_home "$ENV{HOME}")
@@ -133,41 +132,34 @@ if(NOT CTEST_TEST_TIMEOUT)
   set(CTEST_TEST_TIMEOUT 1500)
 endif()
 
-set(dashboard_use_git_repo 1)
-if(dashboard_use_git_repo)
-  # Select Git source to use.
-  if(NOT DEFINED dashboard_git_url)
-    set(dashboard_git_url "git://cmake.org/cmake.git")
+# Select Git source to use.
+if(NOT DEFINED dashboard_git_url)
+  set(dashboard_git_url "git://cmake.org/cmake.git")
+endif()
+if(NOT DEFINED dashboard_git_branch)
+  if("${dashboard_model}" STREQUAL "Nightly")
+    set(dashboard_git_branch nightly)
+  else()
+    set(dashboard_git_branch next)
   endif()
-  if(NOT DEFINED dashboard_git_branch)
-    if("${dashboard_model}" STREQUAL "Nightly")
-      set(dashboard_git_branch nightly)
-    else()
-      set(dashboard_git_branch next)
-    endif()
-  endif()
-  if(NOT DEFINED dashboard_git_crlf)
-    if(UNIX)
-      set(dashboard_git_crlf false)
-    else(UNIX)
-      set(dashboard_git_crlf true)
-    endif(UNIX)
-  endif()
+endif()
+if(NOT DEFINED dashboard_git_crlf)
+  if(UNIX)
+    set(dashboard_git_crlf false)
+  else(UNIX)
+    set(dashboard_git_crlf true)
+  endif(UNIX)
+endif()
 
-  # Look for a GIT command-line client.
-  if(NOT DEFINED CTEST_GIT_COMMAND)
-    find_program(CTEST_GIT_COMMAND
-      NAMES git git.cmd
-      PATH_SUFFIXES Git/cmd Git/bin
-      )
-  endif()
-
-  # Use git only if driving CTest is at least 2.8.0.
-  if("${CMAKE_VERSION}" VERSION_LESS 2.8)
-    set(CTEST_GIT_COMMAND "")
-  endif()
-else()
-  set(CTEST_GIT_COMMAND "")
+# Look for a GIT command-line client.
+if(NOT DEFINED CTEST_GIT_COMMAND)
+  find_program(CTEST_GIT_COMMAND
+    NAMES git git.cmd
+    PATH_SUFFIXES Git/cmd Git/bin
+    )
+endif()
+if(NOT CTEST_GIT_COMMAND)
+  message(FATAL_ERROR "CTEST_GIT_COMMAND not available!")
 endif()
 
 # Select a source directory name.
@@ -190,20 +182,18 @@ endif()
 
 # Delete source tree if it is incompatible with current VCS.
 if(EXISTS ${CTEST_SOURCE_DIRECTORY})
-  if(CTEST_GIT_COMMAND)
-    if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git")
-      set(vcs_refresh "because it is not managed by git.")
-    else()
-      execute_process(
-        COMMAND ${CTEST_GIT_COMMAND} reset --hard
-        WORKING_DIRECTORY "${CTEST_SOURCE_DIRECTORY}"
-        OUTPUT_VARIABLE output
-        ERROR_VARIABLE output
-        RESULT_VARIABLE failed
-        )
-      if(failed)
-        set(vcs_refresh "because its .git may be corrupted.")
-      endif()
+  if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git")
+    set(vcs_refresh "because it is not managed by git.")
+  else()
+    execute_process(
+      COMMAND ${CTEST_GIT_COMMAND} reset --hard
+      WORKING_DIRECTORY "${CTEST_SOURCE_DIRECTORY}"
+      OUTPUT_VARIABLE output
+      ERROR_VARIABLE output
+      RESULT_VARIABLE failed
+      )
+    if(failed)
+      set(vcs_refresh "because its .git may be corrupted.")
     endif()
   endif()
   if(vcs_refresh AND "${CTEST_SOURCE_DIRECTORY}" MATCHES "/CMake[^/]*")
@@ -216,22 +206,21 @@ endif()
 if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}"
     AND NOT DEFINED CTEST_CHECKOUT_COMMAND)
   get_filename_component(_name "${CTEST_SOURCE_DIRECTORY}" NAME)
-  if(CTEST_GIT_COMMAND)
-    execute_process(COMMAND ${CTEST_GIT_COMMAND} --version OUTPUT_VARIABLE output)
-    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+(\\.g[0-9a-f]+)?)?" GIT_VERSION "${output}")
-    if(NOT "${GIT_VERSION}" VERSION_LESS "1.6.5")
-      # Have "git clone -b <branch>" option.
-      set(git_branch_new "-b ${dashboard_git_branch}")
-      set(git_branch_old)
-    else()
-      # No "git clone -b <branch>" option.
-      set(git_branch_new)
-      set(git_branch_old "-b ${dashboard_git_branch} origin/${dashboard_git_branch}")
-    endif()
+  execute_process(COMMAND ${CTEST_GIT_COMMAND} --version OUTPUT_VARIABLE output)
+  string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+(\\.g[0-9a-f]+)?)?" GIT_VERSION "${output}")
+  if(NOT "${GIT_VERSION}" VERSION_LESS "1.6.5")
+    # Have "git clone -b <branch>" option.
+    set(git_branch_new "-b ${dashboard_git_branch}")
+    set(git_branch_old)
+  else()
+    # No "git clone -b <branch>" option.
+    set(git_branch_new)
+    set(git_branch_old "-b ${dashboard_git_branch} origin/${dashboard_git_branch}")
+  endif()
 
-    # Generate an initial checkout script.
-    set(ctest_checkout_script ${CTEST_DASHBOARD_ROOT}/${_name}-init.cmake)
-    file(WRITE ${ctest_checkout_script} "# git repo init script for ${_name}
+  # Generate an initial checkout script.
+  set(ctest_checkout_script ${CTEST_DASHBOARD_ROOT}/${_name}-init.cmake)
+  file(WRITE ${ctest_checkout_script} "# git repo init script for ${_name}
 execute_process(
   COMMAND \"${CTEST_GIT_COMMAND}\" clone -n ${git_branch_new} -- \"${dashboard_git_url}\"
           \"${CTEST_SOURCE_DIRECTORY}\"
@@ -247,15 +236,7 @@ if(EXISTS \"${CTEST_SOURCE_DIRECTORY}/.git\")
     )
 endif()
 ")
-    set(CTEST_CHECKOUT_COMMAND "\"${CMAKE_COMMAND}\" -P \"${ctest_checkout_script}\"")
-  endif()
-  # CTest delayed initialization is broken, so we put the
-  # CTestConfig.cmake info here.
-  set(CTEST_NIGHTLY_START_TIME "21:00:00 EDT")
-  set(CTEST_DROP_METHOD "http")
-  set(CTEST_DROP_SITE "www.cdash.org")
-  set(CTEST_DROP_LOCATION "/CDash/submit.php?project=CMake")
-  set(CTEST_DROP_SITE_CDASH TRUE)
+  set(CTEST_CHECKOUT_COMMAND "\"${CMAKE_COMMAND}\" -P \"${ctest_checkout_script}\"")
 endif()
 
 # Enable bootstrap build?
@@ -317,19 +298,15 @@ macro(write_cache)
       set(cache_make_program CMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM})
     endif()
   endif()
-  set(cache_git_executable "")
-  if(CTEST_GIT_COMMAND)
-    set(cache_git_executable "GIT_EXECUTABLE:FILEPATH=${CTEST_GIT_COMMAND}")
-  endif()
   file(WRITE ${CTEST_BINARY_DIRECTORY}/CMakeCache.txt "
 SITE:STRING=${CTEST_SITE}
 BUILDNAME:STRING=${CTEST_BUILD_NAME}
 CTEST_TEST_CTEST:BOOL=${CTEST_TEST_CTEST}
 CTEST_USE_LAUNCHERS:BOOL=${CTEST_USE_LAUNCHERS}
 DART_TESTING_TIMEOUT:STRING=${CTEST_TEST_TIMEOUT}
+GIT_EXECUTABLE:FILEPATH=${CTEST_GIT_COMMAND}
 ${cache_build_type}
 ${cache_make_program}
-${cache_git_executable}
 ${dashboard_cache}
 ")
 endmacro(write_cache)
