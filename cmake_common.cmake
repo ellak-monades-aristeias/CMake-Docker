@@ -400,3 +400,27 @@ while(NOT dashboard_done)
     set(dashboard_done 1)
   endif()
 endwhile()
+
+#-----------------------------------------------------------------------------
+# Run KWSys dashboard script too.
+if(EXISTS ${CTEST_SCRIPT_DIRECTORY}/kwsys_common.cmake
+    AND "${dashboard_model}" MATCHES "^(Nightly|Experimental)$"
+    AND NOT dashboard_no_KWSys)
+  if(COMMAND dashboard_hook_KWSys)
+    dashboard_hook_KWSys()
+  endif()
+  foreach(dir source binary)
+    string(TOUPPER "${dir}" DIR)
+    if("${dashboard_${dir}_name}" MATCHES "^(.*)[Cc][Mm][Aa][Kk][Ee](.*)$")
+      set(KWSys_${dir}_name "${CMAKE_MATCH_1}KWSys${CMAKE_MATCH_2}")
+      unset(CTEST_${DIR}_DIRECTORY)
+    elseif("${CTEST_${DIR}_DIRECTORY}" MATCHES "^(.*)[Cc][Mm][Aa][Kk][Ee](.*)$")
+      set(CTEST_${DIR}_DIRECTORY "${CMAKE_MATCH_1}KWSys${CMAKE_MATCH_2}")
+    else()
+      unset(CTEST_${DIR}_DIRECTORY)
+    endif()
+  endforeach()
+  unset(CTEST_CHECKOUT_COMMAND)
+  unset(CTEST_CONFIGURE_COMMAND)
+  include(${CTEST_SCRIPT_DIRECTORY}/kwsys_common.cmake)
+endif()
