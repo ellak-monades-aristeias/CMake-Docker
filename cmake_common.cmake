@@ -268,6 +268,7 @@ foreach(req
 endforeach(req)
 
 # Print summary information.
+set(vars "")
 foreach(v
     CTEST_SITE
     CTEST_BUILD_NAME
