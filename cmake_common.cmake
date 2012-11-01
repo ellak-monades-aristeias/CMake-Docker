@@ -403,7 +403,8 @@ endwhile()
 
 #-----------------------------------------------------------------------------
 # Run KWSys dashboard script too.
-if(EXISTS ${CTEST_SCRIPT_DIRECTORY}/kwsys_common.cmake
+get_filename_component(cmake_common_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(EXISTS ${cmake_common_dir}/kwsys_common.cmake
     AND "${dashboard_model}" MATCHES "^(Nightly|Experimental)$"
     AND NOT dashboard_no_KWSys)
   if(COMMAND dashboard_hook_KWSys)
