@@ -423,5 +423,5 @@ if(EXISTS ${cmake_common_dir}/kwsys_common.cmake
   endforeach()
   unset(CTEST_CHECKOUT_COMMAND)
   unset(CTEST_CONFIGURE_COMMAND)
-  include(${CTEST_SCRIPT_DIRECTORY}/kwsys_common.cmake)
+  include(${cmake_common_dir}/kwsys_common.cmake)
 endif()
