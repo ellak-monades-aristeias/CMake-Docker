@@ -126,6 +126,16 @@ if(BUILD_TESTING)
     set(CPACK_BINARY_DEB OFF)
   endif()
 
+  # Look for docker to use for tests.
+  # The tool does not work with spaces in the path.
+  find_program(DOCKER_EXECUTABLE NAMES docker)
+
+  if(DOCKER_EXECUTABLE)
+    set(CPACK_BINARY_DOCKER ON)
+  else()
+    set(CPACK_BINARY_DOCKER OFF)
+  endif()
+
   #---------------------------------------------------------------------------
   # Add tests below here.
 
@@ -938,6 +948,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --build-options ${build_options}
         -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
         -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
+        -DCPACK_BINARY_DOCKER:BOOL=${CPACK_BINARY_DOCKER}
         ${CPackComponents_BUILD_OPTIONS}
         --graphviz=CPackComponents.dot
       --test-command ${CMAKE_CMAKE_COMMAND}
@@ -956,6 +967,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     # before adding DEB tests
     if(CPACK_BINARY_DEB)
       list(APPEND ACTIVE_CPACK_GENERATORS DEB)
+    endif()
+
+    # Check whether if docker command is found
+    # before addinng DOCKER tests
+    if(CPACK_BINARY_DOCKER)
+      list(APPEND ACTIVE_CPACK_GENERATORS DOCKER)
     endif()
 
     # ACTIVE_CPACK_GENERATORS variable
@@ -1033,6 +1050,39 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
               "${CPackRun_CPackDEBConfiguration}"
               -P "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}/RunCPackVerifyResult-${CPackDEBConfiguration}.cmake")
           list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}")
+      endforeach()
+    endif()
+
+    # docker specific
+    if(DOCKER_EXECUTABLE)
+      unset(CPackRun_CPackDOCKERConfiguration_ALL_CONFIGS)
+      set(DOCKER_TEST_NAMES "CPackComponentsDOCKER")
+      set(DOCKER_CONFIGURATIONS_TO_TEST "components-depend1")
+      set(CPackGen "DOCKER")
+      set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
+
+      foreach(CPackDOCKERConfiguration IN LISTS DOCKER_CONFIGURATIONS_TO_TEST)
+        set(CPackRun_CPackDOCKERConfiguration "-DCPackDOCKERConfiguration=${CPackDOCKERConfiguration}")
+        add_test(${DOCKER_TEST_NAMES}-${CPackDOCKERConfiguration}
+          ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+          --build-and-test
+            "${CMake_SOURCE_DIR}/Tests/${DOCKER_TEST_NAMES}"
+            "${CMake_BINARY_DIR}/Tests/${DOCKER_TEST_NAMES}/build${CPackGen}-${CPackDOCKERConfiguration}"
+            ${build_generator_args}
+          --build-project CPackComponentsDOCKER
+          --build-options ${build_options}
+              -DCPACK_GENERATOR:STRING=${CPackGen}
+              -DCPACK_BINARY_${CPackGen}:BOOL=ON
+              ${CPackRun_CPackDOCKERConfiguration}
+              ${CPackRun_CPackDOCKERConfiguration_ALL_CONFIGS}
+          --graphviz=${DOCKER_TEST_NAMES}.dot
+          --test-command ${CMAKE_CMAKE_COMMAND}
+            "-D${DOCKER_TEST_NAMES}_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/${DOCKER_TEST_NAMES}"
+            "-D${DOCKER_TEST_NAMES}_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/${DOCKER_TEST_NAMES}/build${CPackGen}-${CPackDOCKERConfiguration}"
+            "${CPackRun_CPackGen}"
+            "${CPackRun_CPackDOCKERConfiguration}"
+            -P "${CMake_SOURCE_DIR}/Tests/${DOCKER_TEST_NAMES}/RunCPackVerifyResult-${CPackDOCKERConfiguration}.cmake")
+          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${DOCKER_TEST_NAMES}/build${CPackGen}-${CPackDOCKERConfiguration}")
       endforeach()
     endif()
 
