@@ -2,8 +2,8 @@
 # Activate component packaging
 #
 
-if(CPACK_GENERATOR MATCHES "DEB")
-   set(CPACK_DEB_COMPONENT_INSTALL "ON")
+if(CPACK_GENERATOR MATCHES "DOCKER")
+   set(CPACK_DOCKER_COMPONENT_INSTALL "ON")
 endif()
 
 #
@@ -15,6 +15,6 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 #set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
 
 # setting dependencies
-set(CPACK_DEBIAN_PACKAGE_DEPENDS                "depend-default")
-set(CPACK_DEBIAN_APPLICATIONS_PACKAGE_DEPENDS   "depend-application")
-set(CPACK_DEBIAN_HEADERS_PACKAGE_DEPENDS        "depend-headers")
+set(CPACK_DOCKER_PACKAGE_DEPENDS                "depend-default")
+set(CPACK_DOCKER_APPLICATIONS_PACKAGE_DEPENDS   "depend-application")
+set(CPACK_DOCKER_HEADERS_PACKAGE_DEPENDS        "depend-headers")

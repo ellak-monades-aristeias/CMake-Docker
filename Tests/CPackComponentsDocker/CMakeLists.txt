@@ -5,7 +5,7 @@
 # which supports CPack components.
 
 cmake_minimum_required(VERSION 2.8.3.20101130 FATAL_ERROR)
-project(CPackComponentsDEB)
+project(CPackComponentsDΟCKER)
 
 # Use GNUInstallDirs in order to enforce lib64 if needed
 include(GNUInstallDirs)
@@ -83,15 +83,15 @@ set(CPACK_COMPONENT_HEADERS_DEPENDS libraries)
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)
-if (NOT DEFINED CPackDEBConfiguration)
-  message(FATAL_ERROR "CPackDEBConfiguration should be defined")
+if (NOT DEFINED CPackDOCKERConfiguration)
+  message(FATAL_ERROR "CPackDOCKERConfiguration should be defined")
 endif()
 
 # Setup project specific CPack-time CPack Config file.
-configure_file(${CPackComponentsDEB_SOURCE_DIR}/MyLibCPackConfig-${CPackDEBConfiguration}.cmake.in
-               ${CPackComponentsDEB_BINARY_DIR}/MyLibCPackConfig-${CPackDEBConfiguration}.cmake
+configure_file(${CPackComponentsDOCKER_SOURCE_DIR}/MyLibCPackConfig-${CPackDOCKERConfiguration}.cmake.in
+               ${CPackComponentsDOCKER_BINARY_DIR}/MyLibCPackConfig-${CPackDOCKERConfiguration}.cmake
                @ONLY)
-set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsDEB_BINARY_DIR}/MyLibCPackConfig-${CPackDEBConfiguration}.cmake)
+set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsDOCKER_BINARY_DIR}/MyLibCPackConfig-${CPackDOCKERConfiguration}.cmake)
 
 
 # Include CPack to introduce the appropriate targets
