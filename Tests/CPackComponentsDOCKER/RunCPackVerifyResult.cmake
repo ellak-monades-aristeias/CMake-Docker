@@ -32,7 +32,7 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
   set(options )
   set(oneValueArgs "EXPECTED_FILE_MASK" "CONFIG_VERBOSE")
   set(multiValueArgs "CONFIG_ARGS")
-  cmake_parse_arguments(run_cpack_deb "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(run_cpack_docker "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
 
   # clean-up previously CPack generated files

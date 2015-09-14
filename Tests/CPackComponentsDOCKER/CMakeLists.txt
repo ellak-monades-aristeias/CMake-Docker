@@ -5,7 +5,7 @@
 # which supports CPack components.
 
 cmake_minimum_required(VERSION 2.8.3.20101130 FATAL_ERROR)
-project(CPackComponentsDΟCKER)
+project(CPackComponentsDOCKER)
 
 # Use GNUInstallDirs in order to enforce lib64 if needed
 include(GNUInstallDirs)
