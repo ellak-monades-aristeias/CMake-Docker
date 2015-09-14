@@ -36,7 +36,7 @@
 #  The Docker base image (FROM)
 #
 #  * Mandatory : YES
-#  * Default   :
+#  * Default   : 'ubuntu'
 #
 #
 # .. variable:: CPACK_DOCKER_PACKAGE_VERSION
@@ -46,6 +46,17 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_VERSION`
 #
+#
+# .. variable:: CPACK_DOCKER_PACKAGE_MANAGER
+#
+#  Sets the Docker package manager of this package.
+#
+#  * Mandatory : NO
+#  * Default   : 'apt-get'
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_PACKAGE_MANAGER "yum")
 #
 # .. variable:: CPACK_DOCKER_PACKAGE_DEPENDS
 #               CPACK_DOCKER_<COMPONENT>_PACKAGE_DEPENDS
@@ -120,7 +131,14 @@ function(cpack_docker_prepare_package_vars)
 
   # Base image: (mandatory)
   if(NOT CPACK_DOCKER_BASE_IMAGE)
-    message(FATAL_ERROR "CPackDocker: Docker package requires a base image")
+    set(CPACK_DOCKER_BASE_IMAGE "ubuntu")
+    message(STATUS "CPackDocker: Docker package requires a base image, defaulting to ubuntu")
+  endif()
+
+  # Package manager: (recommended)
+  if(NOT CPACK_DOCKER_PACKAGE_MANAGER)
+    set(CPACK_DOCKER_PACKAGE_MANAGER "apt-get")
+    message(STATUS "CPackDocker: Docker package requires the definition of a package manager, defaulting to apt-get")
   endif()
 
   # Version: (recommended)
@@ -163,6 +181,7 @@ function(cpack_docker_prepare_package_vars)
   # move variables to parent scope so that they may be used to create debian package
   set(GEN_CPACK_DOCKER_PACKAGE_NAME "${CPACK_DOCKER_PACKAGE_NAME}" PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_BASE_IMAGE "${CPACK_DOCKER_BASE_IMAGE}" PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER "{CPACK_DOCKER_PACKAGE_MANAGER}" PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_VERSION "${CPACK_DOCKER_PACKAGE_VERSION}" PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_MAINTAINER "${CPACK_DOCKER_PACKAGE_MAINTAINER}" PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_DESCRIPTION "${CPACK_DOCKER_PACKAGE_DESCRIPTION}" PARENT_SCOPE)
