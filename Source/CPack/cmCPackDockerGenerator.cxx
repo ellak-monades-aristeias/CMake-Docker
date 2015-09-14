@@ -336,6 +336,15 @@ int cmCPackDockerGenerator::createDocker()
   return 1;
 }
 
+std::string cmCPackDockerGenerator::getPackageManager()
+{
+  std::string cmd("docker run ubuntu yum &> /dev/null ;");
+  std::string output;
+  int retval = -1;
+  int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+      &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
+}
+
 bool cmCPackDockerGenerator::SupportsComponentInstallation() const
 {
   if (IsOn("CPACK_DOCKER_COMPONENT_INSTALL"))

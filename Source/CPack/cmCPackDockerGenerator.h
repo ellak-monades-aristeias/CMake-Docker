@@ -67,6 +67,7 @@ protected:
 
 private:
   int createDocker();
+  std::string getPackageManager();
   std::vector<std::string> packageFiles;
 
 };
