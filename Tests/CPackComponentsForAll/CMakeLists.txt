@@ -49,6 +49,10 @@ install(FILES mylib.h
   DESTINATION include
   COMPONENT headers)
 
+if(CPACK_GENERATOR MATCHES "DOCKER")
+   set(CPACK_DOCKER_BASE_IMAGE "ubuntu")
+endif()
+
 if("${CPACK_GENERATOR}" MATCHES "RPM")
   ############## test man pages
   install(FILES mylib

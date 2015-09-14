@@ -428,13 +428,14 @@ if(NOT CPACK_GENERATOR)
       else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
       endif()
-      option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
-      option(CPACK_BINARY_NSIS "Enable to build NSIS packages"    OFF)
-      option(CPACK_BINARY_RPM  "Enable to build RPM packages"     OFF)
-      option(CPACK_BINARY_STGZ "Enable to build STGZ packages"    ON)
-      option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
-      option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
-      option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
+      option(CPACK_BINARY_DEB     "Enable to build Debian packages"  OFF)
+      option(CPACK_BINARY_DOCKER  "Enable to build Docker packages"  OFF)
+      option(CPACK_BINARY_NSIS    "Enable to build NSIS packages"    OFF)
+      option(CPACK_BINARY_RPM     "Enable to build RPM packages"     OFF)
+      option(CPACK_BINARY_STGZ    "Enable to build STGZ packages"    ON)
+      option(CPACK_BINARY_TBZ2    "Enable to build TBZ2 packages"    OFF)
+      option(CPACK_BINARY_TGZ     "Enable to build TGZ packages"     ON)
+      option(CPACK_BINARY_TXZ     "Enable to build TXZ packages"     OFF)
     endif()
   else()
     option(CPACK_BINARY_7Z   "Enable to build 7-Zip packages" OFF)
@@ -448,6 +449,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_CYGWIN       CygwinBinary)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DEB          DEB)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DOCKER       DOCKER)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
@@ -496,6 +498,7 @@ mark_as_advanced(
   CPACK_BINARY_BUNDLE
   CPACK_BINARY_CYGWIN
   CPACK_BINARY_DEB
+  CPACK_BINARY_DOCKER
   CPACK_BINARY_DRAGNDROP
   CPACK_BINARY_IFW
   CPACK_BINARY_NSIS

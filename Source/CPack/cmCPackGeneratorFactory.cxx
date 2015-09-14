@@ -39,6 +39,7 @@
  && !defined(__QNXNTO__) && !defined(__BEOS__) && !defined(__HAIKU__)
 #  include "cmCPackDebGenerator.h"
 #  include "cmCPackRPMGenerator.h"
+#  include "cmCPackDockerGenerator.h"
 #endif
 
 #ifdef _WIN32
@@ -152,6 +153,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     {
     this->RegisterGenerator("RPM", "RPM packages",
       cmCPackRPMGenerator::CreateGenerator);
+    }
+  if (cmCPackDockerGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("DOCKER", "Docker packages",
+      cmCPackDockerGenerator::CreateGenerator);
     }
 #endif
 }
