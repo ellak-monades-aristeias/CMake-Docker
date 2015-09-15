@@ -7,11 +7,11 @@
 # Variables specific to CPack Docker generator
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# CPackDocker may be used to create Docker package using CPack.
+# CPackDocker may be used to create Docker containers using CPack.
 # CPackDocker is a CPack generator thus it uses the CPACK_XXX variables
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration.
 #
-# CPackDocker has specific features which are controlled by the specifics
+# CPackDocker has specific features which are controlled by the specific
 # :code:`CPACK_DOCKER_XXX` variables.
 #
 # :code:`CPACK_DOCKER_<COMPONENT>_XXXX` variables may be used in order to have
@@ -23,71 +23,225 @@
 # http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#Docker_.28UNIX_only.29 .
 # However as a handy reminder here comes the list of specific variables:
 #
-# .. variable:: CPACK_DOCKER_PACKAGE_NAME
+# .. variable:: CPACK_DOCKER_CONTAINER_NAME
 #
-#  The Docker package summary
+#  The Docker container name
 #
 #  * Mandatory : YES
-#  * Default   : :variable:`CPACK_PACKAGE_NAME` (lower case)
+#  * Default   : :variable:`CPACK_PACKAGE_NAME`
 #
 #
-# .. variable:: CPACK_DOCKER_BASE_IMAGE
+# .. variable:: CPACK_DOCKER_MAINTAINER
 #
-#  The Docker base image (FROM)
+#  The Docker container maintainer
+#
+#  * Mandatory : NO
+#  * Default   : :code:`CPACK_PACKAGE_CONTACT`
+#
+#
+# .. variable:: CPACK_DOCKER_CONTAINER_VERSION
+#
+#  The Docker container version
+#
+#  * Mandatory : NO
+#  * Default   : :variable:`CPACK_PACKAGE_VERSION`
+#
+#
+# .. variable:: CPACK_DOCKER_CONTAINER_DESCRIPTION
+#
+#  The Docker container description
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#    - :variable:`CPACK_DOCKER_CONTAINER_DESCRIPTION` if set or
+#    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
+#
+#
+# .. variable:: CPACK_DOCKER_FROM
+#
+#  The Docker base image for subsequent instructions.
 #
 #  * Mandatory : YES
 #  * Default   : 'ubuntu'
 #
+#  Example::
 #
-# .. variable:: CPACK_DOCKER_PACKAGE_VERSION
-#
-#  The Docker package version
-#
-#  * Mandatory : YES
-#  * Default   : :variable:`CPACK_PACKAGE_VERSION`
+#    set(CPACK_DOCKER_FROM "ubuntu:14.04")
 #
 #
 # .. variable:: CPACK_DOCKER_PACKAGE_MANAGER
 #
-#  Sets the Docker package manager of this package.
+#  Sets the Docker package manager for the base image.
 #
 #  * Mandatory : NO
-#  * Default   : 'apt-get'
+#  * Default   : 
+#
+#    - :variable:`CPACK_DOCKER_PACKAGE_MANAGER` if set or
+#    - Output of common package manager queries in the base image
 #
 #  Example::
 #
 #    set(CPACK_DOCKER_PACKAGE_MANAGER "yum")
 #
+#
 # .. variable:: CPACK_DOCKER_PACKAGE_DEPENDS
 #
-#  Sets the Docker dependencies of this package.
+#  List of package dependencies to be installed using the 
+#  :code:`CPACK_DOCKER_PACKAGE_MANAGER` in the docker base image.
 #
 #  * Mandatory : NO
 #  * Default   :
 #
 #  Example::
 #
-#    set(CPACK_DOCKER_PACKAGE_DEPENDS "libc6")
+#    set(CPACK_DOCKER_PACKAGE_DEPENDS libc6 cmake=2.8.* build-utils)
+# 
 #
-# .. variable:: CPACK_DOCKER_PACKAGE_MAINTAINER
+# .. variable:: CPACK_DOCKER_RUN
 #
-#  The Docker package maintainer
-#
-#  * Mandatory : YES
-#  * Default   : :code:`CPACK_PACKAGE_CONTACT`
-#
-#
-# .. variable:: CPACK_DOCKER_PACKAGE_DESCRIPTION
-#               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
-#
-#  The Docker package description
+#  Adds a custom Docker RUN directive to the Dockerfile.
 #
 #  * Mandatory : NO
 #  * Default   :
 #
-#    - :variable:`CPACK_DOCKER_PACKAGE_DESCRIPTION` if set or
-#    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
+#  Example::
 #
+#    set(CPACK_DOCKER_RUN "wget http://example.tar.gz -O /tmp/example")
+# 
+#
+# .. variable:: CPACK_DOCKER_ADD
+#
+#  Adds a custom Docker ADD directive to the Dockerfile.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_ADD "example.tar.gz /example.tar.gz")
+# 
+#
+# .. variable:: CPACK_DOCKER_COPY
+#
+#  Adds a custom Docker COPY directive to the Dockerfile.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_COPY "example.tar.gz /example.tar.gz")
+# 
+#
+# .. variable:: CPACK_DOCKER_CMD
+#
+#  Adds the CMD command on the Dockerfile
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_CMD "/bin/bash --help")
+# 
+#
+# .. variable:: CPACK_DOCKER_LABEL
+#
+#  Adds custom labels on the Dockerfile
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_LABEL author=me test)
+# 
+#
+# .. variable:: CPACK_DOCKER_EXPOSE
+#
+#  Exposes tcp/udp ports on the host
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_EXPOSE 80 8080)
+# 
+#
+# .. variable:: CPACK_DOCKER_ENV
+#
+#  Updates the environment variables of the Docker image
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_ENV "PATH /usr/local/bin:$PATH")
+# 
+#
+# .. variable:: CPACK_DOCKER_ENTRYPOINT
+#
+#  Sets the image's main command
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_ENTRYPOINT "/entrypoint.sh")
+# 
+#
+# .. variable:: CPACK_DOCKER_VOLUME
+#
+#  Creates a mount point for the image
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_VOLUME "/volume")
+# 
+#
+# .. variable:: CPACK_DOCKER_USER
+#
+#  Sets the USER of the running Docker image
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_USER "root")
+# 
+#
+# .. variable:: CPACK_DOCKER_WORKDIR
+#
+#  Sets the working directory for any commands that follow in the Dockerfile
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_WORKDIR "/root/")
+# 
+#
+# .. variable:: CPACK_DOCKER_ONBUILD
+#
+#  Adds a trigger instruction to be executed when the image is used as a base
+#  for another build
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_ONBUILD "RUN /bin/bash")
+
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
 # Copyright 2007-2015 Aris Synodinos <arissynod@gmail.com>
@@ -120,46 +274,45 @@ function(cpack_docker_prepare_package_vars)
   set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DOCKER_PACKAGE_COMPONENT_PART_PATH}")
 
   # Package: (mandatory)
-  if(NOT CPACK_DOCKER_PACKAGE_NAME)
-    set(CPACK_DOCKER_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
+  if(NOT CPACK_DOCKER_CONTAINER_NAME)
+    set(CPACK_DOCKER_CONTAINER_NAME ${CPACK_PACKAGE_NAME})
+  endif()
+
+  # Maintainer: (recommended)
+  if(NOT CPACK_DOCKER_MAINTAINER)
+    if(NOT CPACK_PACKAGE_CONTACT)
+      message(STATUS "CPackDocker: Docker package recommends a maintainer for a package, set CPACK_PACKAGE_CONTACT or CPACK_DOCKER_MAINTAINER")
+    endif()
+    set(CPACK_DOCKER_MAINTAINER ${CPACK_PACKAGE_CONTACT})
+  endif()
+
+# Version: (recommended)
+  if(NOT CPACK_DOCKER_CONTAINER_VERSION)
+    if(NOT CPACK_PACKAGE_VERSION)
+      message(STATUS "CPackDocker: Docker recommends a container version")
+    endif()
+    set(CPACK_DOCKER_CONTAINER_VERSION ${CPACK_PACKAGE_VERSION})
+  endif()
+
+  # Description: (recommended)
+  if(NOT CPACK_DOCKER_CONTAINER_DESCRIPTION)
+    if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+      message(STATUS "CPackDocker: Docker package recommends a description for a container")
+    endif()
+    set(CPACK_DOCKER_CONTAINER_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
   endif()
 
   # Base image: (mandatory)
-  if(NOT CPACK_DOCKER_BASE_IMAGE)
-    set(CPACK_DOCKER_BASE_IMAGE "ubuntu")
+  if(NOT CPACK_DOCKER_FROM)
+    set(CPACK_DOCKER_FROM "ubuntu")
     message(STATUS "CPackDocker: Docker package requires a base image, defaulting to ubuntu")
   endif()
 
   # Package manager: (recommended)
   if(NOT CPACK_DOCKER_PACKAGE_MANAGER)
-    set(CPACK_DOCKER_PACKAGE_MANAGER "apt-get")
-    message(STATUS "CPackDocker: Docker package requires the definition of a package manager, defaulting to apt-get")
+    set(CPACK_DOCKER_PACKAGE_MANAGER "AUTO")
+    message(STATUS "CPackDocker: CPack will try to automatically assign the correct package manager")
   endif()
-
-  # Version: (recommended)
-  if(NOT CPACK_DOCKER_PACKAGE_VERSION)
-    if(NOT CPACK_PACKAGE_VERSION)
-      message(STATUS "CPackDocker: Docker does not require a package version")
-    endif()
-    set(CPACK_DOCKER_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
-  endif()
-
-  # Maintainer: (mandatory)
-  if(NOT CPACK_DOCKER_PACKAGE_MAINTAINER)
-    if(NOT CPACK_PACKAGE_CONTACT)
-      message(FATAL_ERROR "CPackDocker: Docker package requires a maintainer for a package, set CPACK_PACKAGE_CONTACT or CPACK_DOCKER_PACKAGE_MAINTAINER")
-    endif()
-    set(CPACK_DOCKER_PACKAGE_MAINTAINER ${CPACK_PACKAGE_CONTACT})
-  endif()
-
-  # Description: (recommended)
-  if(NOT CPACK_DOCKER_PACKAGE_DESCRIPTION)
-    if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-      message(FATAL_ERROR "CPackDocker: Docker package does not require a summary for a package")
-    endif()
-    set(CPACK_DOCKER_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-  endif()
-
 
   # Print out some debug information if we were asked for that
   if(CPACK_DOCKER_PACKAGE_DEBUG)
@@ -174,15 +327,26 @@ function(cpack_docker_prepare_package_vars)
   endif()
 
   # move variables to parent scope so that they may be used to create debian package
-  set(GEN_CPACK_DOCKER_PACKAGE_NAME "${CPACK_DOCKER_PACKAGE_NAME}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_BASE_IMAGE "${CPACK_DOCKER_BASE_IMAGE}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER "${CPACK_DOCKER_PACKAGE_MANAGER}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_VERSION "${CPACK_DOCKER_PACKAGE_VERSION}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS "${CPACK_DOCKER_PACKAGE_DEPENDS}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_MAINTAINER "${CPACK_DOCKER_PACKAGE_MAINTAINER}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_DESCRIPTION "${CPACK_DOCKER_PACKAGE_DESCRIPTION}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_HOMEPAGE "${CPACK_DOCKER_PACKAGE_HOMEPAGE}" PARENT_SCOPE)
-  set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_NAME         "${CPACK_DOCKER_CONTAINER_NAME}"        PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_MAINTAINER             "${CPACK_DOCKER_MAINTAINER}"            PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_VERSION      "${CPACK_DOCKER_CONTAINER_VERSION}"     PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_DESCRIPTION  "${CPACK_DOCKER_CONTAINER_DESCRIPTION}" PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_FROM                   "${CPACK_DOCKER_FROM}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER        "${CPACK_DOCKER_PACKAGE_MANAGER}"       PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS        "${CPACK_DOCKER_PACKAGE_DEPENDS}"       PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN                    "${CPACK_DOCKER_RUN}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ADD                    "${CPACK_DOCKER_ADD}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_COPY                   "${CPACK_DOCKER_COPY}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CMD                    "${CPACK_DOCKER_CMD}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_LABEL                  "${CPACK_DOCKER_LABEL}"                 PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_EXPOSE                 "${CPACK_DOCKER_EXPOSE}"                PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ENV                    "${CPACK_DOCKER_ENV}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ENTRYPOINT             "${CPACK_DOCKER_ENTRYPOINT}"            PARENT_SCOPE)
+  set(GEN_CPACK_DOKCER_VOLUME                 "${CPACK_DOCKER_VOLUME}"                PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_USER                   "${CPACK_DOCKER_USER}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_WORKDIR                "${CPACK_DOCKER_WORKDIR}"               PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ONBUILD                "${CPACK_DOCKER_ONBUILD}"               PARENT_SCOPE)
+  set(GEN_WDIR                                "${WDIR}"                               PARENT_SCOPE)
 endfunction()
 
 cpack_docker_prepare_package_vars()
