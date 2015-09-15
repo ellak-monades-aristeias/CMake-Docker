@@ -41,7 +41,6 @@ public:
     return true;
 #endif
     }
-
 protected:
   virtual int InitializeInternal();
   /**
@@ -68,6 +67,10 @@ protected:
 private:
   int createDocker();
   std::string getPackageManager();
+  std::string getLabels();
+  std::string getVersionCorrect(const std::string &input, const std::string &packagemanager);
+  std::string cleanCache(const std::string &packagemanager);
+  std::string getDependencies(const std::string &packagemanager);
   std::vector<std::string> packageFiles;
 
 };

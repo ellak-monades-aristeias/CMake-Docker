@@ -241,6 +241,18 @@
 #  Example::
 #
 #    set(CPACK_DOCKER_ONBUILD "RUN /bin/bash")
+# 
+#
+# .. variable:: CPACK_DOCKER_CONTAINER_HOMEPAGE
+#
+#  Adds a label with the container homepage
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_CONTAINER_HOMEPAGE "http://www.example.com/")
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -310,7 +322,6 @@ function(cpack_docker_prepare_package_vars)
 
   # Package manager: (recommended)
   if(NOT CPACK_DOCKER_PACKAGE_MANAGER)
-    set(CPACK_DOCKER_PACKAGE_MANAGER "AUTO")
     message(STATUS "CPackDocker: CPack will try to automatically assign the correct package manager")
   endif()
 
@@ -346,6 +357,7 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_USER                   "${CPACK_DOCKER_USER}"                  PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_WORKDIR                "${CPACK_DOCKER_WORKDIR}"               PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ONBUILD                "${CPACK_DOCKER_ONBUILD}"               PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE     "${CPACK_DOCKER_CONTAINER_HOMEPAGE}"     PARENT_SCOPE)
   set(GEN_WDIR                                "${WDIR}"                               PARENT_SCOPE)
 endfunction()
 

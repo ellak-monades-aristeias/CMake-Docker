@@ -49,10 +49,6 @@ install(FILES mylib.h
   DESTINATION include
   COMPONENT headers)
 
-if(CPACK_GENERATOR MATCHES "DOCKER")
-   set(CPACK_DOCKER_BASE_IMAGE "ubuntu")
-endif()
-
 if("${CPACK_GENERATOR}" MATCHES "RPM")
   ############## test man pages
   install(FILES mylib
@@ -96,6 +92,11 @@ if("${CPACK_GENERATOR}" MATCHES "RPM")
   # test symbolic link to location outside package
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ./outside_package symlink_outside_package)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_outside_package DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+endif()
+
+if("${CPACK_GENERATOR}" MATCHES "DOCKER")
+  set(CPACK_DOCKER_FROM "centos:6")
+  set(CPACK_DOCKER_PACKAGE_DEPENDS cmake=2.8.* build-essential libc6)
 endif()
 
 # CPack boilerplate for this project
