@@ -111,19 +111,6 @@
 #    set(CPACK_DOCKER_RUN_PREDEPENDS "add-apt-repository -y ppa:example/example")
 # 
 #
-# .. variable:: CPACK_DOCKER_RUN_PERIDEPENDS
-#
-#  Adds a custom Docker RUN directive to the Dockerfile during the
-#  installation of the package dependencies.
-#
-#  * Mandatory : NO
-#  * Default   :
-#
-#  Example::
-#
-#    set(CPACK_DOCKER_RUN_PERIDEPENDS "pip install --upgrade pip")
-# 
-#
 # .. variable:: CPACK_DOCKER_RUN_POSTDEPENDS
 #
 #  Adds a custom Docker RUN directive to the Dockerfile after the
@@ -134,7 +121,8 @@
 #
 #  Example::
 #
-#    set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p /home/example")
+#    set(CPACK_DOCKER_RUN_POSTDEPENDS "pip install --upgrade pip")
+#    set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source;cd source")
 # 
 #
 # .. variable:: CPACK_DOCKER_ADD
@@ -373,7 +361,6 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_PACKAGE_MANAGER        "${CPACK_DOCKER_PACKAGE_MANAGER}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS        "${CPACK_DOCKER_PACKAGE_DEPENDS}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_RUN_PREDEPENDS         "${CPACK_DOCKER_RUN_PREDEPENDS}"        PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_RUN_PERIDEPENDS        "${CPACK_DOCKER_RUN_PERIDEPENDS}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_RUN_POSTDEPENDS        "${CPACK_DOCKER_RUN_POSTDEPENDS}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ADD                    "${CPACK_DOCKER_ADD}"                   PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_COPY                   "${CPACK_DOCKER_COPY}"                  PARENT_SCOPE)

@@ -66,6 +66,7 @@ protected:
 
 private:
   int createDocker();
+  std::string getRun(const std::string &option);
   std::string getPackageManager();
   std::string getLabels();
   std::string getVersionCorrect(const std::string &input, const std::string &packagemanager);

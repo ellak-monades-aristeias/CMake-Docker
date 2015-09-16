@@ -301,7 +301,9 @@ int cmCPackDockerGenerator::createDocker()
     out << "FROM " << docker_base_image << "\n";
     out << "MAINTAINER " << maintainer << "\n";
     out << getLabels() << "\n";
+    out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
+    out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
     out << std::endl;
   }
   // dockerfile
@@ -309,6 +311,28 @@ int cmCPackDockerGenerator::createDocker()
   // dockerimage
 
   return 1;
+}
+
+std::string cmCPackDockerGenerator::getRun(const std::string &option)
+{
+  const char* cstr = this->GetOption(option);
+  if(cstr && *cstr) {
+    std::vector<std::string> run_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), run_strings);
+    std::sort(run_strings.begin(), run_strings.end());
+    std::stringstream output;
+    output << "# " << option << "\n";
+    for (size_t i = 0; i < run_strings.size(); ++i) {
+      if (i == 0)
+        output << "RUN " << run_strings[i];
+      else {
+        output << " \\ \n";
+        output << "    " << run_strings[i];
+      }
+    }
+    return output.str();
+  }
+  return std::string();
 }
 
 std::string cmCPackDockerGenerator::getPackageManager()
@@ -444,6 +468,7 @@ std::string cmCPackDockerGenerator::getDependencies(const std::string &packagema
     cmSystemTools::ExpandListArgument(std::string(depend_cstr), dependencies);
     std::sort(dependencies.begin(), dependencies.end());
     std::stringstream output;
+    output << "# Installing Dependencies\n";
     output << "RUN " << packagemanager << " update -y && " << packagemanager << " install -y";
     for (size_t i = 0; i < dependencies.size(); ++i) {
       output << " \\ \n";
