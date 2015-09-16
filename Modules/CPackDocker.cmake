@@ -98,16 +98,43 @@
 #    set(CPACK_DOCKER_PACKAGE_DEPENDS libc6 cmake=2.8.* build-utils)
 # 
 #
-# .. variable:: CPACK_DOCKER_RUN
+# .. variable:: CPACK_DOCKER_RUN_PREDEPENDS
 #
-#  Adds a custom Docker RUN directive to the Dockerfile.
+#  Adds a custom Docker RUN directive to the Dockerfile before the
+#  installation of the package dependencies.
 #
 #  * Mandatory : NO
 #  * Default   :
 #
 #  Example::
 #
-#    set(CPACK_DOCKER_RUN "wget http://example.tar.gz -O /tmp/example")
+#    set(CPACK_DOCKER_RUN_PREDEPENDS "add-apt-repository -y ppa:example/example")
+# 
+#
+# .. variable:: CPACK_DOCKER_RUN_PERIDEPENDS
+#
+#  Adds a custom Docker RUN directive to the Dockerfile during the
+#  installation of the package dependencies.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_RUN_PERIDEPENDS "pip install --upgrade pip")
+# 
+#
+# .. variable:: CPACK_DOCKER_RUN_POSTDEPENDS
+#
+#  Adds a custom Docker RUN directive to the Dockerfile after the
+#  installation of the package dependencies.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p /home/example")
 # 
 #
 # .. variable:: CPACK_DOCKER_ADD
@@ -345,7 +372,9 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_FROM                   "${CPACK_DOCKER_FROM}"                  PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_MANAGER        "${CPACK_DOCKER_PACKAGE_MANAGER}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS        "${CPACK_DOCKER_PACKAGE_DEPENDS}"       PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_RUN                    "${CPACK_DOCKER_RUN}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN_PREDEPENDS         "${CPACK_DOCKER_RUN_PREDEPENDS}"        PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN_PERIDEPENDS        "${CPACK_DOCKER_RUN_PERIDEPENDS}"       PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN_POSTDEPENDS        "${CPACK_DOCKER_RUN_POSTDEPENDS}"       PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ADD                    "${CPACK_DOCKER_ADD}"                   PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_COPY                   "${CPACK_DOCKER_COPY}"                  PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_CMD                    "${CPACK_DOCKER_CMD}"                   PARENT_SCOPE)
