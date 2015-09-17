@@ -98,7 +98,8 @@ if("${CPACK_GENERATOR}" MATCHES "DOCKER")
   set(CPACK_DOCKER_FROM "base/archlinux")
   set(CPACK_DOCKER_RUN_PREDEPENDS "add-apt-repository -y ppa:example/example")
   set(CPACK_DOCKER_PACKAGE_DEPENDS cmake=2.8.* build-essential libc6)
-  set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source;cd source")
+  set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source" "cd source")
+  set(CPACK_DOCKER_CMD echo -test @test --test)
 endif()
 
 # CPack boilerplate for this project

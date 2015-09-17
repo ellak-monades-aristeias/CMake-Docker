@@ -280,7 +280,7 @@ int cmCPackDockerGenerator::createDocker()
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
-    out << std::endl;
+    out << getCmd() << "\n";
   }
   // dockerfile
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created dockerfile" << std::endl);
@@ -498,6 +498,26 @@ std::string cmCPackDockerGenerator::cleanCache(const std::string &packagemanager
     return std::string("	&& pacman -Sc");
   }
   cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine how to clear the package manager cache" << std::endl);
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getCmd()
+{
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_CMD");
+  if(cstr && *cstr) {
+    std::vector<std::string> cmd_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), cmd_strings);
+    std::stringstream output;
+    for (size_t i = 0; i < cmd_strings.size(); ++i) {
+      if (i == 0)
+        output << "CMD [ \"" << cmd_strings[i] << "\" ";
+      else {
+        output << ", \"" << cmd_strings[i] << "\" ";
+      }
+    }
+    output << "]";
+    return output.str();
+  }
   return std::string();
 }
 
