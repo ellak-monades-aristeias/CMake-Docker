@@ -240,40 +240,16 @@ int cmCPackDockerGenerator::PackageFiles()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Running Package Files" << std::endl);
   int retval = -1;
-
-  /* Are we in the component packaging case */
-  if (WantsComponentInstallation()) {
-    // CASE 1 : COMPONENT ALL-IN-ONE package
-    // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
-    // then the package file is unique and should be open here.
-    if (componentPackageMethod == ONE_PACKAGE)
-    {
-      return PackageComponentsAllInOne();
-    }
-    // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
-    // There will be 1 package for each component group
-    // however one may require to ignore component group and
-    // in this case you'll get 1 package for each component.
-    else
-    {
-      return PackageComponents(componentPackageMethod ==
-                               ONE_PACKAGE_PER_COMPONENT);
-    }
+  std::string prefix = this->GetOption("CPACK_OUTPUT_FILE_PREFIX");
+  prefix += "/";
+  prefix += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  this->SetOption("CPACK_OUTPUT_FILE_PREFIX", prefix.c_str());
+  if (!this->ReadListFile("CPackDocker.cmake")) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while parsing CPackDocker.cmake" << std::endl);
+    retval = 0;
   }
-  // CASE 3 : NON COMPONENT package.
-  else
-  {
-    if (!this->ReadListFile("CPackDocker.cmake"))
-    {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error while parsing CPackDocker.cmake" << std::endl);
-      retval = 0;
-    }
-    else
-    {
-      packageFiles = files;
-      return createDocker();
-    }
+  else {
+    return createDocker();
   }
   return retval;
 }
@@ -282,9 +258,9 @@ int cmCPackDockerGenerator::createDocker()
 {
   std::string dockerfilename;
   dockerfilename = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  dockerfilename += "/";
-  dockerfilename += this->GetOption("CPACK_OUTPUT_FILE_NAME");
   dockerfilename += "/Dockerfile";
+  packageFileNames.clear();
+  packageFileNames.push_back(dockerfilename);
 
   const char* docker_base_image =
       this->GetOption("GEN_CPACK_DOCKER_FROM");
