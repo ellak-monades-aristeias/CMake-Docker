@@ -72,6 +72,7 @@ protected:
 private:
   int createDocker();
   std::string getLabels();
+  std::string getCustomLabel(const std::string &input);
   std::string getRun(const std::string &option);
   std::string getPackageManager();
   std::string getPackageManagerInstall(const std::string &packagemanager);

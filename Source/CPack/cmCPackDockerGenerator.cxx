@@ -315,10 +315,48 @@ std::string cmCPackDockerGenerator::getLabels()
     labels << "      website=\""      << website << "\"";
   }
   if(custom_labels && *custom_labels) {
-    labels << " \\ \n";
-    labels << "      "                << custom_labels << "\"";
+    std::vector<std::string> label_strings;
+    cmSystemTools::ExpandListArgument(std::string(custom_labels), label_strings);
+    for (size_t i = 0; i < label_strings.size(); ++i) {
+      labels << " \\ \n";
+      labels << this->getCustomLabel(label_strings[i]);
+    }
   }
   return labels.str();
+}
+
+std::string cmCPackDockerGenerator::getCustomLabel(const std::string &input)
+{
+  std::stringstream input_str(input);
+  std::string segment;
+  std::vector<std::string> seglist;
+  while(std::getline(input_str, segment, '=')) {
+    seglist.push_back(segment);
+  }
+  if(seglist.size() == 2) {
+    // Specified key and value
+    std::string output;
+    output = "      ";
+    output += seglist[0];
+    output += "=\"";
+    output += seglist[1];
+    output += "\"";
+    return output;
+  }
+  else if(seglist.size() == 1) {
+    // Specified only key
+    std::string output;
+    output = "      ";
+    output += seglist[0];
+    return output;
+  }
+  else {
+    cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Problem parsing custom labels" << std::endl);
+    std::string output;
+    output = "      ";
+    output += input;
+    return output;
+  }
 }
 
 std::string cmCPackDockerGenerator::getRun(const std::string &option)
@@ -477,7 +515,7 @@ std::string cmCPackDockerGenerator::getVersionCorrect(const std::string &input, 
     cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine the version definition operator for this package manager" << std::endl);
     return input;
   }
-  if(seglist.size() == 1) {
+  else if(seglist.size() == 1) {
     return input;
   }
   else {
