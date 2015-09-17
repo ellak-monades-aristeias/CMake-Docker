@@ -95,7 +95,7 @@ if("${CPACK_GENERATOR}" MATCHES "RPM")
 endif()
 
 if("${CPACK_GENERATOR}" MATCHES "DOCKER")
-  set(CPACK_DOCKER_FROM "ubuntu")
+  set(CPACK_DOCKER_FROM "base/archlinux")
   set(CPACK_DOCKER_RUN_PREDEPENDS "add-apt-repository -y ppa:example/example")
   set(CPACK_DOCKER_PACKAGE_DEPENDS cmake=2.8.* build-essential libc6)
   set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source;cd source")

@@ -34,11 +34,16 @@ public:
   static bool CanGenerate()
     {
 #ifdef __APPLE__
-    // on MacOS disable CPackDocker
-    return false;
+    // on MacOS enable CPackDocker if docker is found
+    std::vector<std::string> locations;
+    locations.push_back("/sw/bin");        // Fink
+    locations.push_back("/opt/local/bin"); // MacPorts
+    return cmSystemTools::FindProgram("docker",locations) != "" ? true : false;
 #else
-    // legacy behavior on other systems
-    return true;
+    std::vector<std::string> locations;
+    locations.push_back("/usr/bin");
+    locations.push_back("/usr/local/bin");
+    return cmSystemTools::FindProgram("docker",locations) != "" ? true : false;
 #endif
     }
 protected:
@@ -66,12 +71,14 @@ protected:
 
 private:
   int createDocker();
+  std::string getLabels();
   std::string getRun(const std::string &option);
   std::string getPackageManager();
-  std::string getLabels();
+  std::string getPackageManagerInstall(const std::string &packagemanager);
+  std::string getDependencies(const std::string &packagemanager);
   std::string getVersionCorrect(const std::string &input, const std::string &packagemanager);
   std::string cleanCache(const std::string &packagemanager);
-  std::string getDependencies(const std::string &packagemanager);
+
   std::vector<std::string> packageFiles;
 
 };

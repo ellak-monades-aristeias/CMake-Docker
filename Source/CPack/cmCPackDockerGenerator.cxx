@@ -313,13 +313,45 @@ int cmCPackDockerGenerator::createDocker()
   return 1;
 }
 
+std::string cmCPackDockerGenerator::getLabels()
+{
+  // Add all labels in one command to minimize docker layers
+  std::stringstream labels;
+  const char* docker_container_name     = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_NAME");
+  const char* docker_container_version  = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_VERSION");
+  const char* description               = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_DESCRIPTION");
+  const char* website                   = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE");
+  const char* custom_labels             = this->GetOption("GEN_CPACK_DOCKER_LABEL");
+  labels << "LABEL";
+  if(docker_container_name && *docker_container_name) {
+    labels << " \\ \n";
+    labels << "    name=\""         << docker_container_name << "\"";
+  }
+  if(docker_container_version && *docker_container_version) {
+    labels << " \\ \n";
+    labels << "    version=\""      << docker_container_version << "\"";
+  }
+  if(description && *description) {
+    labels << " \\ \n";
+    labels << "    description=\""  << description << "\"";
+  }
+  if(website && *website) {
+    labels << " \\ \n";
+    labels << "    website=\""      << website << "\"";
+  }
+  if(custom_labels && *custom_labels) {
+    labels << " \\ \n";
+    labels << "    "                << custom_labels << "\"";
+  }
+  return labels.str();
+}
+
 std::string cmCPackDockerGenerator::getRun(const std::string &option)
 {
   const char* cstr = this->GetOption(option);
   if(cstr && *cstr) {
     std::vector<std::string> run_strings;
     cmSystemTools::ExpandListArgument(std::string(cstr), run_strings);
-    std::sort(run_strings.begin(), run_strings.end());
     std::stringstream output;
     output << "# " << option << "\n";
     for (size_t i = 0; i < run_strings.size(); ++i) {
@@ -372,42 +404,67 @@ std::string cmCPackDockerGenerator::getPackageManager()
       return (std::string("yum"));
     }
   }
+  // Try pacman
+  {
+    std::string cmd = base_cmd;
+    cmd.append("pacman -Sc"); // pacman return non-zero exit code on version query(!?)
+    std::string output;
+    int retval = -1;
+    int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+        &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
+    if (!res)
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running " << cmd << std::endl);
+    if (!retval) {
+      return (std::string("pacman"));
+    }
+  }
   // Could not determine, output error
   cmCPackLogger(cmCPackLog::LOG_ERROR, "CPackDocker: Could not automatically determine the package manager" << std::endl);
   return std::string();
 }
 
-std::string cmCPackDockerGenerator::getLabels()
+std::string cmCPackDockerGenerator::getPackageManagerInstall(const std::string &packagemanager)
 {
-  // Add all labels in one command to minimize docker layers
-  std::stringstream labels;
-  const char* docker_container_name     = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_NAME");
-  const char* docker_container_version  = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_VERSION");
-  const char* description               = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_DESCRIPTION");
-  const char* website                   = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE");
-  const char* custom_labels             = this->GetOption("GEN_CPACK_DOCKER_LABEL");
-  labels << "LABEL";
-  if(docker_container_name && *docker_container_name) {
-    labels << " \\ \n";
-    labels << "    name=\""         << docker_container_name << "\"";
+  const char* package_manager_install = this->GetOption("GEN_CPACK_DOCKER_PACKAGE_MANAGER_INSTALL");
+  std::stringstream output;
+  if (package_manager_install && *package_manager_install) {
+    output << "RUN " << package_manager_install;
+    return output.str();
   }
-  if(docker_container_version && *docker_container_version) {
-    labels << " \\ \n";
-    labels << "    version=\""      << docker_container_version << "\"";
+  if(packagemanager.compare("apt-get") == 0) {
+    output << "RUN " << packagemanager << " update && " << packagemanager << " install -y";
+    return output.str();
   }
-  if(description && *description) {
-    labels << " \\ \n";
-    labels << "    description=\""  << description << "\"";
+  if(packagemanager.compare("yum") == 0) {
+    output << "RUN " << packagemanager << " update -y && " << packagemanager << " install -y";
+    return output.str();
   }
-  if(website && *website) {
-    labels << " \\ \n";
-    labels << "    website=\""      << website << "\"";
+  if(packagemanager.compare("pacman") == 0) {
+    output << "RUN " << packagemanager << " -Syu -- noconfirm && " << packagemanager << " -S --noconfirm";
+    return output.str();
   }
-  if(custom_labels && *custom_labels) {
-    labels << " \\ \n";
-    labels << "    "                << custom_labels << "\"";
+  cmCPackLogger(cmCPackLog::LOG_ERROR, "CPackDocker: Could not automatically determine the package manager install command" << std::endl);
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getDependencies(const std::string &packagemanager)
+{
+  const char* depend_cstr = this->GetOption("GEN_CPACK_DOCKER_PACKAGE_DEPENDS");
+  if(depend_cstr && *depend_cstr) {
+    std::vector<std::string> dependencies;
+    cmSystemTools::ExpandListArgument(std::string(depend_cstr), dependencies);
+    std::sort(dependencies.begin(), dependencies.end());
+    std::stringstream output;
+    output << "# Installing Dependencies\n";
+    output << this->getPackageManagerInstall(packagemanager);
+    for (size_t i = 0; i < dependencies.size(); ++i) {
+      output << " \\ \n";
+      output << "    " << getVersionCorrect(dependencies[i], packagemanager);
+    }
+    output << " \\ \n" << this->cleanCache(packagemanager);
+    return output.str();
   }
-  return labels.str();
+  return std::string();
 }
 
 std::string cmCPackDockerGenerator::getVersionCorrect(const std::string &input, const std::string &packagemanager)
@@ -436,6 +493,12 @@ std::string cmCPackDockerGenerator::getVersionCorrect(const std::string &input, 
       output += seglist[1];
       return output;
     }
+    if(packagemanager.compare("pacman") == 0) {
+      // pacman does not support version definition
+      std::string output;
+      output = seglist[0];
+      return output;
+    }
     cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine the version definition operator for this package manager" << std::endl);
     return input;
   }
@@ -456,27 +519,10 @@ std::string cmCPackDockerGenerator::cleanCache(const std::string &packagemanager
   if(packagemanager.compare("yum") == 0) {
     return std::string("	&& yum clean all");
   }
-  cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine how to clear the package manager cache" << std::endl);
-  return std::string();
-}
-
-std::string cmCPackDockerGenerator::getDependencies(const std::string &packagemanager)
-{
-  const char* depend_cstr = this->GetOption("GEN_CPACK_DOCKER_PACKAGE_DEPENDS");
-  if(depend_cstr && *depend_cstr) {
-    std::vector<std::string> dependencies;
-    cmSystemTools::ExpandListArgument(std::string(depend_cstr), dependencies);
-    std::sort(dependencies.begin(), dependencies.end());
-    std::stringstream output;
-    output << "# Installing Dependencies\n";
-    output << "RUN " << packagemanager << " update -y && " << packagemanager << " install -y";
-    for (size_t i = 0; i < dependencies.size(); ++i) {
-      output << " \\ \n";
-      output << "    " << getVersionCorrect(dependencies[i], packagemanager);
-    }
-    output << " \\ \n" << this->cleanCache(packagemanager);
-    return output.str();
+  if(packagemanager.compare("pacman") == 0) {
+    return std::string("	&& pacman -Sc");
   }
+  cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine how to clear the package manager cache" << std::endl);
   return std::string();
 }
 

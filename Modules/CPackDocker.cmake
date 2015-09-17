@@ -85,6 +85,21 @@
 #    set(CPACK_DOCKER_PACKAGE_MANAGER "yum")
 #
 #
+# .. variable:: CPACK_DOCKER_PACKAGE_MANAGER_INSTALL
+#
+#  Sets the Docker package manager install command for the base image.
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+#    - :variable:`CPACK_DOCKER_PACKAGE_MANAGER_INSTALL` if set or
+#    - Automatic assignment based on the well-known package managers
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_PACKAGE_MANAGER_UPDATE "${CPACK_DOCKER_PACKAGE_MANAGER} update -y && ${CPACK_DOCKER_PACKAGE_MANAGER} install -y")
+#
+#
 # .. variable:: CPACK_DOCKER_PACKAGE_DEPENDS
 #
 #  List of package dependencies to be installed using the 
@@ -353,28 +368,29 @@ function(cpack_docker_prepare_package_vars)
   endif()
 
   # move variables to parent scope so that they may be used to create debian package
-  set(GEN_CPACK_DOCKER_CONTAINER_NAME         "${CPACK_DOCKER_CONTAINER_NAME}"        PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_MAINTAINER             "${CPACK_DOCKER_MAINTAINER}"            PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_CONTAINER_VERSION      "${CPACK_DOCKER_CONTAINER_VERSION}"     PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_CONTAINER_DESCRIPTION  "${CPACK_DOCKER_CONTAINER_DESCRIPTION}" PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_FROM                   "${CPACK_DOCKER_FROM}"                  PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER        "${CPACK_DOCKER_PACKAGE_MANAGER}"       PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS        "${CPACK_DOCKER_PACKAGE_DEPENDS}"       PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_RUN_PREDEPENDS         "${CPACK_DOCKER_RUN_PREDEPENDS}"        PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_RUN_POSTDEPENDS        "${CPACK_DOCKER_RUN_POSTDEPENDS}"       PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_ADD                    "${CPACK_DOCKER_ADD}"                   PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_COPY                   "${CPACK_DOCKER_COPY}"                  PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_CMD                    "${CPACK_DOCKER_CMD}"                   PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_LABEL                  "${CPACK_DOCKER_LABEL}"                 PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_EXPOSE                 "${CPACK_DOCKER_EXPOSE}"                PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_ENV                    "${CPACK_DOCKER_ENV}"                   PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_ENTRYPOINT             "${CPACK_DOCKER_ENTRYPOINT}"            PARENT_SCOPE)
-  set(GEN_CPACK_DOKCER_VOLUME                 "${CPACK_DOCKER_VOLUME}"                PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_USER                   "${CPACK_DOCKER_USER}"                  PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_WORKDIR                "${CPACK_DOCKER_WORKDIR}"               PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_ONBUILD                "${CPACK_DOCKER_ONBUILD}"               PARENT_SCOPE)
-  set(GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE     "${CPACK_DOCKER_CONTAINER_HOMEPAGE}"     PARENT_SCOPE)
-  set(GEN_WDIR                                "${WDIR}"                               PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_NAME           "${CPACK_DOCKER_CONTAINER_NAME}"          PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_MAINTAINER               "${CPACK_DOCKER_MAINTAINER}"              PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_VERSION        "${CPACK_DOCKER_CONTAINER_VERSION}"       PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_DESCRIPTION    "${CPACK_DOCKER_CONTAINER_DESCRIPTION}"   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_FROM                     "${CPACK_DOCKER_FROM}"                    PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER          "${CPACK_DOCKER_PACKAGE_MANAGER}"         PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_MANAGER_INSTALL  "${CPACK_DOCKER_PACKAGE_MANAGER_INSTALL}" PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_PACKAGE_DEPENDS          "${CPACK_DOCKER_PACKAGE_DEPENDS}"         PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN_PREDEPENDS           "${CPACK_DOCKER_RUN_PREDEPENDS}"          PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_RUN_POSTDEPENDS          "${CPACK_DOCKER_RUN_POSTDEPENDS}"         PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ADD                      "${CPACK_DOCKER_ADD}"                     PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_COPY                     "${CPACK_DOCKER_COPY}"                    PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CMD                      "${CPACK_DOCKER_CMD}"                     PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_LABEL                    "${CPACK_DOCKER_LABEL}"                   PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_EXPOSE                   "${CPACK_DOCKER_EXPOSE}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ENV                      "${CPACK_DOCKER_ENV}"                     PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ENTRYPOINT               "${CPACK_DOCKER_ENTRYPOINT}"              PARENT_SCOPE)
+  set(GEN_CPACK_DOKCER_VOLUME                   "${CPACK_DOCKER_VOLUME}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_USER                     "${CPACK_DOCKER_USER}"                    PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_WORKDIR                  "${CPACK_DOCKER_WORKDIR}"                 PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_ONBUILD                  "${CPACK_DOCKER_ONBUILD}"                 PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE       "${CPACK_DOCKER_CONTAINER_HOMEPAGE}"      PARENT_SCOPE)
+  set(GEN_WDIR                                  "${WDIR}"                                 PARENT_SCOPE)
 endfunction()
 
 cpack_docker_prepare_package_vars()
