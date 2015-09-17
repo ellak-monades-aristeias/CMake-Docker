@@ -56,6 +56,7 @@ All Modules
    /module/CPackComponent
    /module/CPackCygwin
    /module/CPackDeb
+   /module/CPackDocker
    /module/CPackDMG
    /module/CPackIFW
    /module/CPackNSIS

@@ -1,6 +1,6 @@
 #.rst:
 # CPackDocker
-# --------
+# -----------
 #
 # The builtin (binary) CPack Docker generator (Unix only)
 #

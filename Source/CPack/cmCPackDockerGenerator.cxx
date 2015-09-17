@@ -324,24 +324,23 @@ std::string cmCPackDockerGenerator::getLabels()
   const char* custom_labels             = this->GetOption("GEN_CPACK_DOCKER_LABEL");
   labels << "LABEL";
   if(docker_container_name && *docker_container_name) {
-    labels << " \\ \n";
-    labels << "    name=\""         << docker_container_name << "\"";
+    labels << " name=\""              << docker_container_name << "\"";
   }
   if(docker_container_version && *docker_container_version) {
     labels << " \\ \n";
-    labels << "    version=\""      << docker_container_version << "\"";
+    labels << "      version=\""      << docker_container_version << "\"";
   }
   if(description && *description) {
     labels << " \\ \n";
-    labels << "    description=\""  << description << "\"";
+    labels << "      description=\""  << description << "\"";
   }
   if(website && *website) {
     labels << " \\ \n";
-    labels << "    website=\""      << website << "\"";
+    labels << "      website=\""      << website << "\"";
   }
   if(custom_labels && *custom_labels) {
     labels << " \\ \n";
-    labels << "    "                << custom_labels << "\"";
+    labels << "      "                << custom_labels << "\"";
   }
   return labels.str();
 }
