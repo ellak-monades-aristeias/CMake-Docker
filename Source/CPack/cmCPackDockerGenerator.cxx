@@ -277,6 +277,7 @@ int cmCPackDockerGenerator::createDocker()
     out << "FROM " << docker_base_image << "\n";
     out << "MAINTAINER " << maintainer << "\n";
     out << getLabels() << "\n";
+    out << getVolume() << "\n";
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
@@ -357,6 +358,46 @@ std::string cmCPackDockerGenerator::getCustomLabel(const std::string &input)
     output += input;
     return output;
   }
+}
+
+std::string cmCPackDockerGenerator::getVolume()
+{
+  const char* cstr = this->GetOption("CPACK_DOCKER_VOLUME");
+  if(cstr && *cstr) {
+    std::vector<std::string> vol_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), vol_strings);
+    std::stringstream output;
+    for (size_t i = 0; i < vol_strings.size(); ++i) {
+      if (i == 0)
+        output << "VOLUME [ \"" << vol_strings[i] << "\" ";
+      else {
+        output << ", \"" << vol_strings[i] << "\" ";
+      }
+    }
+    output << "]";
+    return output.str();
+  }
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getExpose()
+{
+  const char* cstr = this->GetOption("CPACK_DOCKER_EXPOSE");
+  if(cstr && *cstr) {
+    std::vector<std::string> exp_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), exp_strings);
+    std::stringstream output;
+    for (size_t i = 0; i < exp_strings.size(); ++i) {
+      if (i == 0)
+        output << "EXPOSE [ \"" << exp_strings[i] << "\" ";
+      else {
+        output << ", \"" << exp_strings[i] << "\" ";
+      }
+    }
+    output << "]";
+    return output.str();
+  }
+  return std::string();
 }
 
 std::string cmCPackDockerGenerator::getRun(const std::string &option)
