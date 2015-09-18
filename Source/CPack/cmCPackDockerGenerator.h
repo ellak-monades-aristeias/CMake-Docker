@@ -75,6 +75,7 @@ private:
   std::string getCustomLabel(const std::string &input);
   std::string getVolume();
   std::string getExpose();
+  std::string getEnv();
   std::string getRun(const std::string &option);
   std::string getPackageManager();
   std::string getPackageManagerInstall(const std::string &packagemanager);
