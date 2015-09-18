@@ -589,13 +589,13 @@ std::string cmCPackDockerGenerator::getVersionCorrect(const std::string &input, 
 std::string cmCPackDockerGenerator::cleanCache(const std::string &packagemanager)
 {
   if(packagemanager.compare("apt-get") == 0) {
-    return std::string("	&& rm -rf /var/lib/apt/lists/*");
+    return std::string("    && rm -rf /var/lib/apt/lists/*");
   }
   if(packagemanager.compare("yum") == 0) {
-    return std::string("	&& yum clean all");
+    return std::string("    && yum clean all");
   }
   if(packagemanager.compare("pacman") == 0) {
-    return std::string("	&& pacman -Sc");
+    return std::string("    && pacman -Sc");
   }
   cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine how to clear the package manager cache" << std::endl);
   return std::string();
