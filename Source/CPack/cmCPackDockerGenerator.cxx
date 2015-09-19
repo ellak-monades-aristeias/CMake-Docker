@@ -282,6 +282,7 @@ int cmCPackDockerGenerator::createDocker()
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
+    out << getEntrypoint() << "\n";
     out << getCmd() << "\n";
   }
   // dockerfile
@@ -613,6 +614,25 @@ std::string cmCPackDockerGenerator::getCmd()
         output << "CMD [ \"" << cmd_strings[i] << "\" ";
       else
         output << ", \"" << cmd_strings[i] << "\" ";
+    }
+    output << "]";
+    return output.str();
+  }
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getEntrypoint()
+{
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_ENTRYPOINT");
+  if(cstr && *cstr) {
+    std::vector<std::string> entry_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), entry_strings);
+    std::stringstream output;
+    for (size_t i = 0; i < entry_strings.size(); ++i) {
+      if (i == 0)
+        output << "ENTRYPOINT [ \"" << entry_strings[i] << "\" ";
+      else
+        output << ", \"" << entry_strings[i] << "\" ";
     }
     output << "]";
     return output.str();

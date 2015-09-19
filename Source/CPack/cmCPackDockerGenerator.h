@@ -83,6 +83,7 @@ private:
   std::string getVersionCorrect(const std::string &input, const std::string &packagemanager);
   std::string cleanCache(const std::string &packagemanager);
   std::string getCmd();
+  std::string getEntrypoint();
 
   std::vector<std::string> packageFiles;
 

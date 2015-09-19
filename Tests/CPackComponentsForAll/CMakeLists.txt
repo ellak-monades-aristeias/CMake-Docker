@@ -104,6 +104,7 @@ if("${CPACK_GENERATOR}" MATCHES "DOCKER")
   set(CPACK_DOCKER_PACKAGE_DEPENDS cmake=2.8.* build-essential libc6)
   set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source" "cd source")
   set(CPACK_DOCKER_CMD echo -test @test --test)
+  set(CPACK_DOCKER_ENTRYPOINT top -b)
 endif()
 
 # CPack boilerplate for this project
