@@ -281,6 +281,7 @@ int cmCPackDockerGenerator::createDocker()
     out << getVolume() << "\n";
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
+    out << getUser() << "\n";
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
     out << getEntrypoint() << "\n";
     out << getCmd() << "\n";
@@ -420,6 +421,18 @@ std::string cmCPackDockerGenerator::getEnv()
         output << " \\ \n    " << seglist[0] << "=\"" << seglist[1] << "\"";
     }
     return output.str();
+  }
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getUser()
+{
+  const char* cstr = this->GetOption("CPACK_DOCKER_USER");
+  if(cstr && *cstr) {
+    std::string output;
+    output = "USER ";
+    output += cstr;
+    return std::string(output);
   }
   return std::string();
 }
