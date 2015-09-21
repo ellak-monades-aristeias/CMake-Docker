@@ -284,6 +284,7 @@ int cmCPackDockerGenerator::createDocker()
     out << getUser();
     out << getWorkdir();
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS");
+    out << getOnbuild();
     out << getEntrypoint();
     out << getCmd();
   }
@@ -666,6 +667,21 @@ std::string cmCPackDockerGenerator::getEntrypoint()
         output << ", \"" << entry_strings[i] << "\" ";
     }
     output << "]" << std::endl;
+    return output.str();
+  }
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getOnbuild()
+{
+  const char* cstr = this->GetOption("CPACK_DOCKER_ONBUILD");
+  if(cstr && *cstr) {
+    std::vector<std::string> onbuild_strings;
+    cmSystemTools::ExpandListArgument(std::string(cstr), onbuild_strings);
+    std::stringstream output;
+    for (size_t i = 0; i < onbuild_strings.size(); ++i) {
+      output << "ONBUILD " << onbuild_strings[i] << std::endl;
+    }
     return output.str();
   }
   return std::string();

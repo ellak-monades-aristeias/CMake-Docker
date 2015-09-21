@@ -86,6 +86,7 @@ private:
   std::string getWorkdir();
   std::string getCmd();
   std::string getEntrypoint();
+  std::string getOnbuild();
 
   std::vector<std::string> packageFiles;
 
