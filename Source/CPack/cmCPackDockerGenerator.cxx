@@ -282,6 +282,7 @@ int cmCPackDockerGenerator::createDocker()
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS") << "\n";
     out << getDependencies(packagemanager) << "\n";
     out << getUser() << "\n";
+    out << getWorkdir() << "\n";
     out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS") << "\n";
     out << getEntrypoint() << "\n";
     out << getCmd() << "\n";
@@ -612,6 +613,19 @@ std::string cmCPackDockerGenerator::cleanCache(const std::string &packagemanager
     return std::string("    && pacman -Sc");
   }
   cmCPackLogger(cmCPackLog::LOG_WARNING, "CPackDocker: Cannot determine how to clear the package manager cache" << std::endl);
+  return std::string();
+}
+
+std::string cmCPackDockerGenerator::getWorkdir()
+{
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_WORKDIR");
+  if(cstr && *cstr) {
+    std::string output;
+    output = "WORKDIR [ \"";
+    output += cstr;
+    output += "\" ]";
+    return output;
+  }
   return std::string();
 }
 
