@@ -48,17 +48,14 @@ int cmCPackDockerGenerator::InitializeInternal()
 int cmCPackDockerGenerator::PackageOnePack(std::string initialTopLevel,
                                            std::string packageName)
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Running OnePack" << std::endl);
   int retval = 1;
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
-  std::string packageFileName(
-        cmSystemTools::GetParentDirectory(toplevel)
-        );
-  std::string outputFileName(
-        std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-        +"-"+packageName + this->GetOutputExtension()
-        );
+  std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
+  std::string outputFileName(std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+                             + "-"
+                             + packageName
+                             + this->GetOutputExtension());
 
   localToplevel += "/"+ packageName;
   /* replace the TEMP DIRECTORY with the component one */
@@ -69,13 +66,6 @@ int cmCPackDockerGenerator::PackageOnePack(std::string initialTopLevel,
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
                   packageFileName.c_str());
-  // Tell CPackDocker.cmake the name of the component GROUP.
-  this->SetOption("CPACK_DOCKER_PACKAGE_COMPONENT",packageName.c_str());
-  // Tell CPackDocker.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += packageName;
-  this->SetOption("CPACK_DOCKER_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
   if (!this->ReadListFile("CPackDocker.cmake"))
   {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -238,29 +228,31 @@ int cmCPackDockerGenerator::PackageComponentsAllInOne()
 //----------------------------------------------------------------------
 int cmCPackDockerGenerator::PackageFiles()
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Running Package Files" << std::endl);
   int retval = -1;
-  std::string prefix = this->GetOption("CPACK_OUTPUT_FILE_PREFIX");
-  prefix += "/";
-  prefix += this->GetOption("CPACK_OUTPUT_FILE_NAME");
-  this->SetOption("CPACK_OUTPUT_FILE_PREFIX", prefix.c_str());
-  if (!this->ReadListFile("CPackDocker.cmake")) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while parsing CPackDocker.cmake" << std::endl);
-    retval = 0;
-  }
-  else {
-    return createDocker();
+  if (WantsComponentInstallation()) {
+    if (componentPackageMethod == ONE_PACKAGE)
+      return PackageComponentsAllInOne();
+    else
+      return PackageComponents(componentPackageMethod ==
+                               ONE_PACKAGE_PER_COMPONENT);
+  } else {
+    if (!this->ReadListFile("CPackDocker.cmake")) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while parsing CPackDocker.cmake" << std::endl);
+      retval = 0;
+    }
+    else {
+      packageFiles = files;
+      return createDocker();
+    }
   }
   return retval;
 }
 
 int cmCPackDockerGenerator::createDocker()
 {
-  std::string dockerfilename;
-  dockerfilename = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  dockerfilename += "/Dockerfile";
-  packageFileNames.clear();
-  packageFileNames.push_back(dockerfilename);
+  std::string dockerfilename = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  dockerfilename += "/";
+  dockerfilename += this->GetOption("CPACK_OUTPUT_FILE_NAME");
 
   const char* docker_base_image =
       this->GetOption("GEN_CPACK_DOCKER_FROM");

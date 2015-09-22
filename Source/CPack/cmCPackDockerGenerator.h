@@ -64,7 +64,7 @@ protected:
    */
   int PackageComponentsAllInOne();
   virtual int PackageFiles();
-  virtual const char* GetOutputExtension() { return ""; }
+  virtual const char* GetOutputExtension() { return ".Dockerfile"; }
   virtual bool SupportsComponentInstallation() const;
   virtual std::string GetComponentInstallDirNameSuffix(
       const std::string& componentName);
