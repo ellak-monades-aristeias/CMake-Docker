@@ -270,6 +270,7 @@ int cmCPackDockerGenerator::createDocker()
     out << "MAINTAINER " << maintainer << std::endl;
     out << getEnv();
     out << getLabels();
+    out << getFiles();
     out << getVolume();
     out << getRun("CPACK_DOCKER_RUN_PREDEPENDS");
     out << getDependencies(packagemanager);
@@ -355,6 +356,14 @@ std::string cmCPackDockerGenerator::getCustomLabel(const std::string &input)
     output += input;
     return output;
   }
+}
+
+std::string cmCPackDockerGenerator::getFiles()
+{
+  std::stringstream output;
+  std::string dir_name = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  output << "COPY [ \"" << dir_name << "\" , \"/\" ]" << std::endl;
+  return output.str();
 }
 
 std::string cmCPackDockerGenerator::getVolume()

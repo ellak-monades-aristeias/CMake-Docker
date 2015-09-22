@@ -73,6 +73,7 @@ private:
   int createDocker();
   std::string getLabels();
   std::string getCustomLabel(const std::string &input);
+  std::string getFiles();
   std::string getVolume();
   std::string getExpose();
   std::string getEnv();
