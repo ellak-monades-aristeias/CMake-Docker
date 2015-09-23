@@ -285,11 +285,11 @@ int cmCPackDockerGenerator::createDocker()
     // dockerimage
     std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
     // docker policy enforces lower case for container tags
-    std::string tag_name = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_NAME");
-    std::size_t found = output_name.rfind(this->GetOutputExtension());
+    std::string tag_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+    std::size_t found = tag_name.rfind(this->GetOutputExtension());
     if (found!=std::string::npos)
-      output_name = output_name.substr(0, found);
-
+      tag_name = tag_name.substr(0, found);
+    tag_name = cmsys::SystemTools::LowerCase(tag_name);
     std::stringstream cmd;
     cmd << "docker build --file \""
         <<  this->GetOption("CPACK_OUTPUT_FILE_NAME")

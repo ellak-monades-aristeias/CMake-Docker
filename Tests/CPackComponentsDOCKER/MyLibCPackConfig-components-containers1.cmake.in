@@ -3,7 +3,7 @@
 #
 
 if(CPACK_GENERATOR MATCHES "DOCKER")
-   set(CPACK_DOCKER_COMPONENT_INSTALL "ON")
+   set(CPACK_DOCKER_COMPONENT_INSTALL "OFF")
 endif()
 
 #
@@ -12,24 +12,8 @@ endif()
 #set(CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE)
 #set(CPACK_COMPONENTS_GROUPING)
 set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
-#set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
+# set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
 
 # setting dependencies
 set(CPACK_DOCKER_FROM 							"ubuntu")
-set(CPACK_DOCKER_LABEL 							"distro=${CPACK_DOCKER_FROM}" "test.${CPACK_DOCKER_FROM}.beta=true")
-set(CPACK_DOCKER_PACKAGE_DEPENDS                "cmake=2.8.*" "build-essential")
-set(CPACK_DOCKER_APPLICATIONS_PACKAGE_DEPENDS   "adduser")
-set(CPACK_DOCKER_HEADERS_PACKAGE_DEPENDS        "libc6")
 set(CPACK_DOCKER_BUILD_CONTAINER				TRUE)
-
-
-# set(CPACK_DOCKER_EXPOSE 80 8080 23512)
-# set(CPACK_DOCKER_USER test-user)
-# set(CPACK_DOCKER_VOLUME "/test1" "/test2")
-# set(CPACK_DOCKER_ENV "PATH=/root/bin:$PATH" "SHELL=/bin/zsh")
-# set(CPACK_DOCKER_RUN_PREDEPENDS "add-apt-repository -y ppa:example/example")
-# set(CPACK_DOCKER_WORKDIR "/home/aris/test folder with spaces/test@with$special#characters")
-# set(CPACK_DOCKER_RUN_POSTDEPENDS "mkdir -p source" "cd source")
-# set(CPACK_DOCKER_ONBUILD "RUN /bin/bash" "ADD source /home/source")
-# set(CPACK_DOCKER_CMD echo -test @test --test)
-# set(CPACK_DOCKER_ENTRYPOINT top -b)

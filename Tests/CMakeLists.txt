@@ -1058,7 +1058,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       unset(CPackRun_CPackDOCKERConfiguration_ALL_CONFIGS)
       set(DOCKER_TEST_NAMES "CPackComponentsDOCKER")
       set(DOCKER_CONFIGURATIONS_TO_TEST "components-depend1"
-                                        "components-containers1")
+                                        "components-containers1"
+                                        "components-expose1"
+                                        "components-user1"
+                                        "components-volume1")
       set(CPackGen "DOCKER")
       set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
 
