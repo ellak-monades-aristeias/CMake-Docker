@@ -56,7 +56,7 @@ int cmCPackDockerGenerator::PackageOnePack(std::string initialTopLevel,
                              + "-"
                              + packageName
                              + this->GetOutputExtension());
-
+  outputFileName = cmsys::SystemTools::LowerCase(outputFileName);
   localToplevel += "/"+ packageName;
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
@@ -179,6 +179,7 @@ int cmCPackDockerGenerator::PackageComponentsAllInOne()
         std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
         + this->GetOutputExtension()
         );
+  outputFileName = cmsys::SystemTools::LowerCase(outputFileName);
   // all GROUP in one vs all COMPONENT in one
   localToplevel += "/"+compInstDirName;
 
@@ -282,8 +283,43 @@ int cmCPackDockerGenerator::createDocker()
     out << getCmd();
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created dockerfile" << std::endl);
-  // dockerimage
 
+  if (IsOn("GEN_CPACK_DOCKER_BUILD_CONTAINER")) {
+    // dockerimage
+    std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+    std::size_t found = output_name.rfind(".Dockerfile");
+    if (found!=std::string::npos)
+      output_name = output_name.substr(0, found);
+    std::stringstream cmd;
+    cmd << "docker build --file \""
+        <<  this->GetOption("CPACK_OUTPUT_FILE_NAME")
+        << "\" --tag=\""
+        << output_name
+        << "\" .";
+    std::string output;
+    int retval = -1;
+    bool res = cmSystemTools::RunSingleCommand(cmd.str().c_str(),
+                                               &output,
+                                               &output,
+                                               &retval,
+                                               this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                               this->GeneratorVerbose,
+                                               0);
+    if (!res || retval) {
+      std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+      tmpFile += "/Docker.log";
+      cmGeneratedFileStream ofs(tmpFile.c_str());
+      ofs << "# Run command: " << cmd.str() << std::endl
+          << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
+          << "# Output:" << std::endl
+          << output << std::endl;
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
+                    << cmd.str() << std::endl
+                    << "Please check " << tmpFile << " for errors" << std::endl);
+      return 0;
+    }
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created container" << std::endl);
+  }
   return 1;
 }
 
@@ -361,8 +397,13 @@ std::string cmCPackDockerGenerator::getCustomLabel(const std::string &input)
 std::string cmCPackDockerGenerator::getFiles()
 {
   std::stringstream output;
+  size_t topLevelLength = std::string(this->GetOption("GEN_WDIR")).length();
   std::string dir_name = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  output << "COPY [ \"" << dir_name << "\" , \"/\" ]" << std::endl;
+  std::string::size_type slashPos = dir_name.find('/', topLevelLength+1);
+
+  std::string relative_dir = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  relative_dir += dir_name.substr(topLevelLength, slashPos - topLevelLength);
+  output << "COPY [ \"" << relative_dir << "\" , \"/\" ]" << std::endl;
   return output.str();
 }
 

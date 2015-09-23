@@ -6,7 +6,7 @@ include(${CPackComponentsDOCKER_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 
 # expected results
-set(expected_file_mask "${CPackComponentsDOCKER_BINARY_DIR}/MyLib-*.Dockerfile")
+set(expected_file_mask "${CPackComponentsDOCKER_BINARY_DIR}/mylib-*.dockerfile")
 set(expected_count 3)
 
 

@@ -283,6 +283,18 @@
 #  Example::
 #
 #    set(CPACK_DOCKER_CONTAINER_HOMEPAGE "http://www.example.com/")
+# 
+#
+# .. variable:: CPACK_DOCKER_BUILD_CONTAINER
+#
+#  Automatically builds the docker images of the components
+#
+#  * Mandatory : NO
+#  * Default   : NO
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_BUILD_CONTAINER TRUE)
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -355,6 +367,10 @@ function(cpack_docker_prepare_package_vars)
     message(STATUS "CPackDocker: CPack will try to automatically assign the correct package manager")
   endif()
 
+  if(NOT CPACK_DOCKER_BUILD_CONTAINER)
+    set(CPACK_DOCKER_BUILD_CONTAINER FALSE)
+  endif()
+
   # Print out some debug information if we were asked for that
   if(CPACK_DOCKER_PACKAGE_DEBUG)
      message("CPackDocker:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
@@ -390,6 +406,7 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_WORKDIR                  "${CPACK_DOCKER_WORKDIR}"                 PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ONBUILD                  "${CPACK_DOCKER_ONBUILD}"                 PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE       "${CPACK_DOCKER_CONTAINER_HOMEPAGE}"      PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_BUILD_CONTAINER          "${CPACK_DOCKER_BUILD_CONTAINER}"         PARENT_SCOPE)
   set(GEN_WDIR                                  "${WDIR}"                                 PARENT_SCOPE)
 endfunction()
 
