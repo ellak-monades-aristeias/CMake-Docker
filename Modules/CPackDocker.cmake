@@ -48,6 +48,7 @@
 #
 #
 # .. variable:: CPACK_DOCKER_CONTAINER_DESCRIPTION
+#               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
 #
 #  The Docker container description
 #
@@ -101,6 +102,7 @@
 #
 #
 # .. variable:: CPACK_DOCKER_PACKAGE_DEPENDS
+#               CPACK_DOCKER_<COMPONENT>_PACKAGE_DEPENDS
 #
 #  List of package dependencies to be installed using the 
 #  :code:`CPACK_DOCKER_PACKAGE_MANAGER` in the docker base image.
@@ -185,7 +187,7 @@
 #
 #  Example::
 #
-#    set(CPACK_DOCKER_LABEL author=me test)
+#    set(CPACK_DOCKER_LABEL author="me test")
 # 
 #
 # .. variable:: CPACK_DOCKER_EXPOSE
@@ -321,11 +323,15 @@ if(CMAKE_BINARY_DIR)
 endif()
 
 if(NOT UNIX)
-  message(FATAL_ERROR "CPackDocker.cmake may only be used under UNIX.")
+  message(FATAL_ERROR "CPackDocker.cmake mif(NOT CPACK_DOCKER_CONTAINER_ay only be used under UNIX.")
 endif()
 
 function(cpack_docker_prepare_package_vars)
-  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DOCKER_PACKAGE_COMPONENT_PART_PATH}")
+  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DOCKER_CONTAINER_COMPONENT_PART_PATH}")
+
+  if(CPACK_DOCKER_CONTAINER_COMPONENT)
+    string(TOUPPER "${CPACK_DOCKER_CONTAINER_COMPONENT}" _local_component_name)
+  endif()
 
   # Package: (mandatory)
   if(NOT CPACK_DOCKER_CONTAINER_NAME)
@@ -349,11 +355,25 @@ function(cpack_docker_prepare_package_vars)
   endif()
 
   # Description: (recommended)
-  if(NOT CPACK_DOCKER_CONTAINER_DESCRIPTION)
-    if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-      message(STATUS "CPackDocker: Docker package recommends a description for a container")
+  if(NOT CPACK_DOCKER_CONTAINER_COMPONENT)
+    if(NOT CPACK_DOCKER_CONTAINER_DESCRIPTION)
+      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+        message(STATUS "CPackDocker: Docker package recommends a description for a container")
+      endif()
+      set(CPACK_DOCKER_CONTAINER_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     endif()
-    set(CPACK_DOCKER_CONTAINER_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+  else()
+    set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
+
+    # component description overrides package description
+    if(${component_description_var})
+      set(CPACK_DOCKER_CONTAINER_DESCRIPTION ${${component_description_var}})
+    elseif(NOT CPACK_DOCKER_CONTAINER_DESCRIPTION)
+      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+        message(STATUS "CPackDocker: Docker package recommends a description for a container")
+      endif()
+      set(CPACK_DOCKER_CONTAINER_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+    endif()
   endif()
 
   # Base image: (mandatory)
@@ -370,6 +390,26 @@ function(cpack_docker_prepare_package_vars)
   if(NOT CPACK_DOCKER_BUILD_CONTAINER)
     set(CPACK_DOCKER_BUILD_CONTAINER FALSE)
   endif()
+
+  if(CPACK_DOCKER_CONTAINER_COMPONENT)
+    set(_component_depends_var "CPACK_DOCKER_${_local_component_name}_PACKAGE_DEPENDS")
+
+    # if set, overrides the global dependency
+    if(DEFINED ${_component_depends_var})
+      set(CPACK_DOCKER_PACKAGE_DEPENDS "${${_component_depends_var}}")
+      if(CPACK_DOCKER_PACKAGE_DEBUG)
+        message("CPackDocker Debug: component '${_local_component_name}' dependencies set to '${CPACK_DOCKER_PACKAGE_DEPENDS}'")
+      endif()
+    endif()
+  endif()
+
+  if(CPACK_DOCKER_CONTAINER_COMPONENT)
+    set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "-${CPACK_DOCKER_CONTAINER_COMPONENT}")
+    string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME}" CPACK_DOCKER_CONTAINER_NAME)
+  else()
+    set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "")
+  endif()
+
 
   # Print out some debug information if we were asked for that
   if(CPACK_DOCKER_PACKAGE_DEBUG)

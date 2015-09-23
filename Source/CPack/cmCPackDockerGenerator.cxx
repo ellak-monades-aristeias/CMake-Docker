@@ -56,16 +56,21 @@ int cmCPackDockerGenerator::PackageOnePack(std::string initialTopLevel,
                              + "-"
                              + packageName
                              + this->GetOutputExtension());
-  outputFileName = cmsys::SystemTools::LowerCase(outputFileName);
   localToplevel += "/"+ packageName;
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
   packageFileName += "/"+ outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName.c_str());
+  // Tell CPackDocker.cmake the name of the component GROUP.
+  this->SetOption("CPACK_DOCKER_CONTAINER_COMPONENT", packageName.c_str());
+  // Tell CPackDeb.cmake the path where the component is.
+  std::string component_path = "/";
+  component_path += packageName;
+  this->SetOption("CPACK_DOCKER_CONTAINER_COMPONENT_PART_PATH", component_path.c_str());
+
   if (!this->ReadListFile("CPackDocker.cmake"))
   {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -155,7 +160,6 @@ int cmCPackDockerGenerator::PackageComponents(bool ignoreGroup)
 //----------------------------------------------------------------------
 int cmCPackDockerGenerator::PackageComponentsAllInOne()
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Running AllInOne" << std::endl);
   int retval = 1;
   std::string compInstDirName;
   /* Reset package file name list it will be populated during the
@@ -172,30 +176,23 @@ int cmCPackDockerGenerator::PackageComponentsAllInOne()
 
   // The ALL GROUPS in ONE package case
   std::string localToplevel(initialTopLevel);
-  std::string packageFileName(
-        cmSystemTools::GetParentDirectory(toplevel)
-        );
-  std::string outputFileName(
-        std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-        + this->GetOutputExtension()
-        );
-  outputFileName = cmsys::SystemTools::LowerCase(outputFileName);
+  std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
+  std::string outputFileName(std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+                             + this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
   localToplevel += "/"+compInstDirName;
 
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
   packageFileName += "/"+ outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName.c_str());
   // Tell CPackDocker.cmake the path where the component is.
   std::string component_path = "/";
   component_path += compInstDirName;
-  this->SetOption("CPACK_DOCKER_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
+  this->SetOption("CPACK_DOCKER_CONTAINER_COMPONENT_PART_PATH", component_path.c_str());
   if (!this->ReadListFile("CPackDocker.cmake"))
   {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -287,14 +284,17 @@ int cmCPackDockerGenerator::createDocker()
   if (IsOn("GEN_CPACK_DOCKER_BUILD_CONTAINER")) {
     // dockerimage
     std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
-    std::size_t found = output_name.rfind(".Dockerfile");
+    // docker policy enforces lower case for container tags
+    std::string tag_name = this->GetOption("GEN_CPACK_DOCKER_CONTAINER_NAME");
+    std::size_t found = output_name.rfind(this->GetOutputExtension());
     if (found!=std::string::npos)
       output_name = output_name.substr(0, found);
+
     std::stringstream cmd;
     cmd << "docker build --file \""
         <<  this->GetOption("CPACK_OUTPUT_FILE_NAME")
         << "\" --tag=\""
-        << output_name
+        << tag_name
         << "\" .";
     std::string output;
     int retval = -1;
@@ -397,12 +397,10 @@ std::string cmCPackDockerGenerator::getCustomLabel(const std::string &input)
 std::string cmCPackDockerGenerator::getFiles()
 {
   std::stringstream output;
-  size_t topLevelLength = std::string(this->GetOption("GEN_WDIR")).length();
-  std::string dir_name = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  std::string::size_type slashPos = dir_name.find('/', topLevelLength+1);
+  std::string absolute_dir = this->GetOption("GEN_WDIR");
+  std::string top_level_parent = cmSystemTools::GetParentDirectory(toplevel);
+  std::string relative_dir = absolute_dir.substr(top_level_parent.length()+1, absolute_dir.length());
 
-  std::string relative_dir = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  relative_dir += dir_name.substr(topLevelLength, slashPos - topLevelLength);
   output << "COPY [ \"" << relative_dir << "\" , \"/\" ]" << std::endl;
   return output.str();
 }
