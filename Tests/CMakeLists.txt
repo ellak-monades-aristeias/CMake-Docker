@@ -1057,11 +1057,23 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(DOCKER_EXECUTABLE)
       unset(CPackRun_CPackDOCKERConfiguration_ALL_CONFIGS)
       set(DOCKER_TEST_NAMES "CPackComponentsDOCKER")
-      set(DOCKER_CONFIGURATIONS_TO_TEST "components-depend1"
+      set(DOCKER_CONFIGURATIONS_TO_TEST "components-cmd1"
                                         "components-containers1"
+                                        "components-depend1"
+                                        "components-depend2"
+                                        "components-depend3"
+                                        "components-depend4"
+                                        "components-entrypoint1"
+                                        "components-env1"
                                         "components-expose1"
+                                        "components-label1"
+                                        "components-label2"
+                                        "components-onbuild1"
+                                        "components-postdepends1"
+                                        "components-predepends1"
                                         "components-user1"
-                                        "components-volume1")
+                                        "components-volume1"
+                                        "components-workdir1")
       set(CPackGen "DOCKER")
       set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
 

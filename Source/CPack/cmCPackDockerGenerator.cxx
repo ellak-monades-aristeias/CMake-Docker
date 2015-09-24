@@ -292,7 +292,7 @@ int cmCPackDockerGenerator::createDocker()
     tag_name = cmsys::SystemTools::LowerCase(tag_name);
     std::stringstream cmd;
     cmd << "docker build --file \""
-        <<  this->GetOption("CPACK_OUTPUT_FILE_NAME")
+        <<  output_name
         << "\" --tag=\""
         << tag_name
         << "\" .";
