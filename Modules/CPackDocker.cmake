@@ -297,6 +297,18 @@
 #  Example::
 #
 #    set(CPACK_DOCKER_BUILD_CONTAINER TRUE)
+# 
+#
+# .. variable:: CPACK_DOCKER_DELETE_CONTAINER
+#
+#  Automatically deletes the docker images of the components after building them
+#
+#  * Mandatory : NO
+#  * Default   : NO
+#
+#  Example::
+#
+#    set(CPACK_DOCKER_DELETE_CONTAINER TRUE)
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -391,6 +403,15 @@ function(cpack_docker_prepare_package_vars)
     set(CPACK_DOCKER_BUILD_CONTAINER FALSE)
   endif()
 
+  if(NOT CPACK_DOCKER_DELETE_CONTAINER)
+    set(CPACK_DOCKER_DELETE_CONTAINER FALSE)
+  endif()
+
+  if(CPACK_DOCKER_DELETE_CONTAINER AND NOT CPACK_DOCKER_BUILD_CONTAINER)
+    message(AUTHOR_WARNING "CPackDocker: The container must be built to be deleted")
+    set(CPACK_DOCKER_DELETE_CONTAINER FALSE)
+  endif()
+
   if(CPACK_DOCKER_CONTAINER_COMPONENT)
     set(_component_depends_var "CPACK_DOCKER_${_local_component_name}_PACKAGE_DEPENDS")
 
@@ -447,6 +468,7 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_ONBUILD                  "${CPACK_DOCKER_ONBUILD}"                 PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_CONTAINER_HOMEPAGE       "${CPACK_DOCKER_CONTAINER_HOMEPAGE}"      PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_BUILD_CONTAINER          "${CPACK_DOCKER_BUILD_CONTAINER}"         PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_DELETE_CONTAINER         "${CPACK_DOCKER_DELETE_CONTAINER}"        PARENT_SCOPE)
   set(GEN_WDIR                                  "${WDIR}"                                 PARENT_SCOPE)
 endfunction()
 

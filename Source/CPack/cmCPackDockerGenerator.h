@@ -71,6 +71,8 @@ protected:
 
 private:
   int createDocker();
+  int buildDockerContainer();
+  int deleteDockerContainer();
   std::string getLabels();
   std::string getCustomLabel(const std::string &input);
   std::string getFiles();

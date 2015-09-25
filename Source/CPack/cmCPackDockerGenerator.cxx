@@ -282,44 +282,93 @@ int cmCPackDockerGenerator::createDocker()
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created dockerfile" << std::endl);
 
   if (IsOn("GEN_CPACK_DOCKER_BUILD_CONTAINER")) {
-    // dockerimage
-    std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
-    // docker policy enforces lower case for container tags
-    std::string tag_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
-    std::size_t found = tag_name.rfind(this->GetOutputExtension());
-    if (found!=std::string::npos)
-      tag_name = tag_name.substr(0, found);
-    tag_name = cmsys::SystemTools::LowerCase(tag_name);
-    std::stringstream cmd;
-    cmd << "docker build --file \""
-        <<  output_name
-        << "\" --tag=\""
-        << tag_name
-        << "\" .";
-    std::string output;
-    int retval = -1;
-    bool res = cmSystemTools::RunSingleCommand(cmd.str().c_str(),
-                                               &output,
-                                               &output,
-                                               &retval,
-                                               this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
-                                               this->GeneratorVerbose,
-                                               0);
-    if (!res || retval) {
-      std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-      tmpFile += "/Docker.log";
-      cmGeneratedFileStream ofs(tmpFile.c_str());
-      ofs << "# Run command: " << cmd.str() << std::endl
-          << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
-          << "# Output:" << std::endl
-          << output << std::endl;
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
-                    << cmd.str() << std::endl
-                    << "Please check " << tmpFile << " for errors" << std::endl);
+    if (!buildDockerContainer())
       return 0;
+    else {
+      if (IsOn("GEN_CPACK_DOCKER_DELETE_CONTAINER")) {
+        if (!deleteDockerContainer())
+          return 0;
+      }
     }
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created container" << std::endl);
   }
+  return 1;
+}
+
+int cmCPackDockerGenerator::buildDockerContainer()
+{
+  // dockerimage
+  std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  // docker policy enforces lower case for container tags
+  std::string tag_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  std::size_t found = tag_name.rfind(this->GetOutputExtension());
+  if (found!=std::string::npos)
+    tag_name = tag_name.substr(0, found);
+  tag_name = cmsys::SystemTools::LowerCase(tag_name);
+  std::stringstream cmd;
+  cmd << "docker build --file \""
+      <<  output_name
+      << "\" --tag=\""
+      << tag_name
+      << "\" .";
+  std::string output;
+  int retval = -1;
+  bool res = cmSystemTools::RunSingleCommand(cmd.str().c_str(),
+                                             &output,
+                                             &output,
+                                             &retval,
+                                             this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                             this->GeneratorVerbose,
+                                             0);
+  if (!res || retval) {
+    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    tmpFile += "/Docker.log";
+    cmGeneratedFileStream ofs(tmpFile.c_str());
+    ofs << "# Run command: " << cmd.str() << std::endl
+        << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
+        << "# Output:" << std::endl
+        << output << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
+                  << cmd.str() << std::endl
+                  << "Please check " << tmpFile << " for errors" << std::endl);
+    return 0;
+  }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: created container" << std::endl);
+  return 1;
+}
+
+int cmCPackDockerGenerator::deleteDockerContainer()
+{
+  // docker policy enforces lower case for container tags
+  std::string tag_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  std::size_t found = tag_name.rfind(this->GetOutputExtension());
+  if (found!=std::string::npos)
+    tag_name = tag_name.substr(0, found);
+  tag_name = cmsys::SystemTools::LowerCase(tag_name);
+  std::stringstream cmd;
+  cmd << "docker rmi -f " << tag_name;
+  std::string output;
+  int retval = -1;
+  bool res = cmSystemTools::RunSingleCommand(cmd.str().c_str(),
+                                             &output,
+                                             &output,
+                                             &retval,
+                                             this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                             this->GeneratorVerbose,
+                                             0);
+  if (!res || retval) {
+    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    tmpFile += "/Docker.log";
+    cmGeneratedFileStream ofs(tmpFile.c_str());
+    ofs << "# Run command: " << cmd.str() << std::endl
+        << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
+        << "# Output:" << std::endl
+        << output << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
+                  << cmd.str() << std::endl
+                  << "Please check " << tmpFile << " for errors" << std::endl);
+    return 0;
+  }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPackDocker: deleted container" << std::endl);
   return 1;
 }
 
