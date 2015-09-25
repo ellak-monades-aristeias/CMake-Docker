@@ -68,4 +68,38 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
   endif()
 endfunction()
 
+# this function runs docker on a .dockerfile and returns its output
+function(run_docker docker_output docker_result)
+  set(${docker_output} "" PARENT_SCOPE)
+
+  find_program(DOCKER_EXECUTABLE docker)
+  if(DOCKER_EXECUTABLE)
+    set(options "")
+    set(oneValueArgs "FILENAME")
+    set(multiValueArgs "")
+    cmake_parse_arguments(run_docker "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT run_docker_FILENAME)
+      message(FATAL_ERROR "error: run_docker needs FILENAME to be set")
+    endif()
+
+    get_filename_component(run_docker_TAGNAME ${run_docker_FILENAME} NAME)
+    string(REPLACE ".dockerfile" "" run_docker_TAGNAME ${run_docker_TAGNAME})
+    string(TOLOWER ${run_docker_TAGNAME} run_docker_TAGNAME)
+
+    execute_process(
+      COMMAND ${DOCKER_EXECUTABLE} build --file="${run_docker_FILENAME}" --tag="${run_docker_TAGNAME}" .
+      WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
+      OUTPUT_VARIABLE DOCKER_OUTPUT 
+      RESULT_VARIABLE DOCKER_RESULT
+      ERROR_VARIABLE  DOCKER_ERROR
+    )
+
+    set(${docker_output} "${run_docker_TAGNAME}" PARENT_SCOPE)
+    set(${docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
+  else()
+    message(FATAL_ERROR "run_docker called without docker executable being present")
+  endif()
+endfunction()
+
 cmake_policy(POP)

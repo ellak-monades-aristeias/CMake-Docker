@@ -31,3 +31,17 @@ if(NOT actual_count EQUAL expected_count)
   message(STATUS "actual_count='${actual_count}'")
   message(FATAL_ERROR "error: expected_count=${expected_count} does not match actual_count=${actual_count}: CPackComponents test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error})")
 endif()
+
+find_program(DOCKER_EXECUTABLE docker)
+if(DOCKER_EXECUTABLE)
+  set(docker_output_errors_all "")
+  foreach(_f IN LISTS actual_output)
+    run_docker(docker_output 
+               docker_result
+               FILENAME "${_f}")
+    file(WRITE "${_f}.log" ${docker_output})
+    if(NOT docker_result)
+      message(FATAL_ERROR "Error while testing the dockerfile")
+    endif()
+  endforeach()
+endif()

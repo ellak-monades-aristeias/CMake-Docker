@@ -305,7 +305,7 @@ int cmCPackDockerGenerator::buildDockerContainer()
     tag_name = tag_name.substr(0, found);
   tag_name = cmsys::SystemTools::LowerCase(tag_name);
   std::stringstream cmd;
-  cmd << "docker build --file \""
+  cmd << "docker build --file=\""
       <<  output_name
       << "\" --tag=\""
       << tag_name
