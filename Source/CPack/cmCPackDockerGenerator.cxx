@@ -647,8 +647,11 @@ std::string cmCPackDockerGenerator::getPackageManagerInstall(const std::string &
     return output.str();
   }
   if(packagemanager.compare("pacman") == 0) {
-    output << "RUN pacman-key --populate && pacman-key --refresh-keys && "
-           << packagemanager << " -Syu --noconfirm && " << packagemanager << " -S --noconfirm";
+    output << "RUN pacman-key --populate && pacman-key --refresh-keys && \\ \n"
+           << "    " << packagemanager << " -Syu --noconfirm && \\ \n"
+//           << "    " << packagemanager << " -S pacman --noconfirm && \\ \n"
+           << "    " << "pacman-db-upgrade && \\ \n"
+           << "    " << packagemanager << " -S --noconfirm";
     return output.str();
   }
   cmCPackLogger(cmCPackLog::LOG_ERROR, "CPackDocker: Could not automatically determine the package manager install command" << std::endl);
