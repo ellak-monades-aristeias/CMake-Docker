@@ -3,7 +3,7 @@
 #
 
 if(CPACK_GENERATOR MATCHES "DOCKER")
-   set(CPACK_DOCKER_COMPONENT_INSTALL "ON")
+   set(CPACK_DOCKER_COMPONENT_INSTALL "OFF")
 endif()
 
 #
@@ -16,4 +16,4 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 
 # setting variables
 set(CPACK_DOCKER_FROM 							"ubuntu")
-set(CPACK_DOCKER_PACKAGE_DEPENDS				"cmake=2.8.*" "build-essential")
+set(CPACK_DOCKER_PACKAGE_DEPENDS				"cmake=2.8.*" "gcc")

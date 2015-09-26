@@ -579,6 +579,20 @@ std::string cmCPackDockerGenerator::getPackageManager()
       return (std::string("apt-get"));
     }
   }
+  // Try dnf
+  {
+    std::string cmd = base_cmd;
+    cmd.append("dnf --version");
+    std::string output;
+    int retval = -1;
+    int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+        &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
+    if (!res)
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running " << cmd << std::endl);
+    if (!retval) {
+      return (std::string("dnf"));
+    }
+  }
   // Try yum
   {
     std::string cmd = base_cmd;
@@ -624,12 +638,17 @@ std::string cmCPackDockerGenerator::getPackageManagerInstall(const std::string &
     output << "RUN " << packagemanager << " update && " << packagemanager << " install -y";
     return output.str();
   }
+  if(packagemanager.compare("dnf") == 0) {
+    output << "RUN " << packagemanager << " -y update && " << packagemanager << " -y install";
+    return output.str();
+  }
   if(packagemanager.compare("yum") == 0) {
     output << "RUN " << packagemanager << " update -y && " << packagemanager << " install -y";
     return output.str();
   }
   if(packagemanager.compare("pacman") == 0) {
-    output << "RUN " << packagemanager << " -Syu -- noconfirm && " << packagemanager << " -S --noconfirm";
+    output << "RUN pacman-key --populate && pacman-key --refresh-keys && "
+           << packagemanager << " -Syu --noconfirm && " << packagemanager << " -S --noconfirm";
     return output.str();
   }
   cmCPackLogger(cmCPackLog::LOG_ERROR, "CPackDocker: Could not automatically determine the package manager install command" << std::endl);
@@ -674,6 +693,14 @@ std::string cmCPackDockerGenerator::getVersionCorrect(const std::string &input, 
       output += seglist[1];
       return output;
     }
+    if(packagemanager.compare("dnf") == 0) {
+      // yum uses '-' for version definition
+      std::string output;
+      output = seglist[0];
+      output += "-";
+      output += seglist[1];
+      return output;
+    }
     if(packagemanager.compare("yum") == 0) {
       // yum uses '-' for version definition
       std::string output;
@@ -704,6 +731,9 @@ std::string cmCPackDockerGenerator::cleanCache(const std::string &packagemanager
 {
   if(packagemanager.compare("apt-get") == 0) {
     return std::string("    && rm -rf /var/lib/apt/lists/*");
+  }
+  if(packagemanager.compare("dnf") == 0) {
+    return std::string("    && dnf clean all");
   }
   if(packagemanager.compare("yum") == 0) {
     return std::string("    && yum clean all");

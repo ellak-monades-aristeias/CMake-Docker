@@ -70,7 +70,7 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
 endfunction()
 
 # this function runs docker on a .dockerfile and returns its output
-function(run_docker docker_output docker_result)
+function(run_docker run_docker_output run_docker_result)
   set(${docker_output} "" PARENT_SCOPE)
 
   find_program(DOCKER_EXECUTABLE docker)
@@ -92,12 +92,12 @@ function(run_docker docker_output docker_result)
     execute_process(
       COMMAND ${DOCKER_EXECUTABLE} build --file=${DOCKERFILE} --tag=${TAGNAME} .
       WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
-      OUTPUT_VARIABLE DOCKER_OUTPUT 
-      RESULT_VARIABLE DOCKER_RESULT
-      ERROR_VARIABLE  DOCKER_ERROR
+      OUTPUT_VARIABLE RUN_DOCKER_OUTPUT 
+      RESULT_VARIABLE RUN_DOCKER_RESULT
+      ERROR_VARIABLE  RUN_DOCKER_ERROR
     )
 
-    set(${run_docker_output} "${DOCKER_OUTPUT}" PARENT_SCOPE)
+    set(${run_docker_output} "DOCKER_OUTPUT:\n${RUN_DOCKER_OUTPUT}\n\nDOCKER_RESULT:\n${RUN_DOCKER_RESULT}\n\nDOCKER_ERROR:\n${RUN_DOCKER_ERROR}" PARENT_SCOPE)
     set(${run_docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
   else()
     message(FATAL_ERROR "run_docker called without docker executable being present")
@@ -105,7 +105,7 @@ function(run_docker docker_output docker_result)
 endfunction()
 
 # this function deletes a docker image
-function(delete_docker docker_output docker_result)
+function(delete_docker delete_docker_output delete_docker_result)
   set(${docker_output} "" PARENT_SCOPE)
 
   find_program(DOCKER_EXECUTABLE docker)
@@ -126,13 +126,13 @@ function(delete_docker docker_output docker_result)
     execute_process(
       COMMAND ${DOCKER_EXECUTABLE} rmi -f ${TAGNAME}
       WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
-      OUTPUT_VARIABLE DOCKER_OUTPUT 
-      RESULT_VARIABLE DOCKER_RESULT
-      ERROR_VARIABLE  DOCKER_ERROR
+      OUTPUT_VARIABLE DEL_DOCKER_OUTPUT 
+      RESULT_VARIABLE DEL_DOCKER_RESULT
+      ERROR_VARIABLE  DEL_DOCKER_ERROR
     )
 
-    set(${delete_docker_output} "${DOCKER_OUTPUT}" PARENT_SCOPE)
-    set(${delete_docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
+    set(${delete_docker_output} "${DEL_DOCKER_OUTPUT}" PARENT_SCOPE)
+    set(${delete_docker_result} "${DEL_DOCKER_RESULT}" PARENT_SCOPE)
   else()
     message(FATAL_ERROR "delete_docker called without docker executable being present")
   endif()

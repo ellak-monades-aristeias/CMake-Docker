@@ -93,6 +93,5 @@ configure_file(${CPackComponentsDOCKER_SOURCE_DIR}/MyLibCPackConfig-${CPackDOCKE
                @ONLY)
 set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsDOCKER_BINARY_DIR}/MyLibCPackConfig-${CPackDOCKERConfiguration}.cmake)
 
-
 # Include CPack to introduce the appropriate targets
 include(CPack)

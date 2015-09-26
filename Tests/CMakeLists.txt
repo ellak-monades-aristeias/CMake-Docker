@@ -1063,6 +1063,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
                                         "components-depend2"
                                         "components-depend3"
                                         "components-depend4"
+                                        "components-depend5"
                                         "components-entrypoint1"
                                         "components-env1"
                                         "components-expose1"

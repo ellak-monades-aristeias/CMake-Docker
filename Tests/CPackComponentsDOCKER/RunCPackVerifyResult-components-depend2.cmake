@@ -39,15 +39,15 @@ if(DOCKER_EXECUTABLE)
     run_docker(run_docker_output 
                run_docker_result
                FILENAME "${_f}")
+    file(WRITE "${_f}.log" ${run_docker_output})
     if(run_docker_result)
-      file(WRITE "run_docker_${_f}.log" ${run_docker_output})
       message(FATAL_ERROR "Error while running the dockerfile")
     endif()
     delete_docker(delete_docker_output
                   delete_docker_result
                   FILENAME "${_f}")
+    file(APPEND "${_f}.log" ${delete_docker_output})
     if(delete_docker_result)
-      file(WRITE "delete_docker_${_f}.log" ${delete_docker_output})
       message(FATAL_ERROR "Error while deleting the docker image")
     endif()
   endforeach()

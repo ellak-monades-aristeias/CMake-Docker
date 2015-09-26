@@ -15,5 +15,5 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 #set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
 
 # setting variables
-set(CPACK_DOCKER_FROM 							"ubuntu")
-set(CPACK_DOCKER_RUN_PREDEPENDS 				"add-apt-repository -y ppa:example/example")
+set(CPACK_DOCKER_FROM 							"centos")
+set(CPACK_DOCKER_PACKAGE_DEPENDS                "cmake")
