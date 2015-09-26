@@ -36,12 +36,19 @@ find_program(DOCKER_EXECUTABLE docker)
 if(DOCKER_EXECUTABLE)
   set(docker_output_errors_all "")
   foreach(_f IN LISTS actual_output)
-    run_docker(docker_output 
-               docker_result
+    run_docker(run_docker_output 
+               run_docker_result
                FILENAME "${_f}")
-    file(WRITE "${_f}.log" ${docker_output})
-    if(NOT docker_result)
-      message(FATAL_ERROR "Error while testing the dockerfile")
+    if(run_docker_result)
+      file(WRITE "run_docker_${_f}.log" ${run_docker_output})
+      message(FATAL_ERROR "Error while running the dockerfile")
+    endif()
+    delete_docker(delete_docker_output
+                  delete_docker_result
+                  FILENAME "${_f}")
+    if(delete_docker_result)
+      file(WRITE "delete_docker_${_f}.log" ${delete_docker_output})
+      message(FATAL_ERROR "Error while deleting the docker image")
     endif()
   endforeach()
 endif()

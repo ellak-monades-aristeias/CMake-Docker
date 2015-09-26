@@ -4,6 +4,7 @@ cmake_policy(VERSION ${CMAKE_VERSION})
 
 
 include(CMakeParseArguments)
+include(${CPackComponentsDOCKER_BINARY_DIR}/CPackConfig.cmake)
 
 message(STATUS "=============================================================================")
 message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
@@ -83,22 +84,57 @@ function(run_docker docker_output docker_result)
       message(FATAL_ERROR "error: run_docker needs FILENAME to be set")
     endif()
 
-    get_filename_component(run_docker_TAGNAME ${run_docker_FILENAME} NAME)
-    string(REPLACE ".dockerfile" "" run_docker_TAGNAME ${run_docker_TAGNAME})
-    string(TOLOWER ${run_docker_TAGNAME} run_docker_TAGNAME)
-
+    get_filename_component(TAGNAME ${run_docker_FILENAME} NAME)
+    get_filename_component(DOCKERFILE ${run_docker_FILENAME} NAME)
+    string(REPLACE ".dockerfile" "" TAGNAME ${TAGNAME})
+    string(TOLOWER ${TAGNAME} TAGNAME)
+    
     execute_process(
-      COMMAND ${DOCKER_EXECUTABLE} build --file="${run_docker_FILENAME}" --tag="${run_docker_TAGNAME}" .
-      WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
+      COMMAND ${DOCKER_EXECUTABLE} build --file=${DOCKERFILE} --tag=${TAGNAME} .
+      WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
       OUTPUT_VARIABLE DOCKER_OUTPUT 
       RESULT_VARIABLE DOCKER_RESULT
       ERROR_VARIABLE  DOCKER_ERROR
     )
 
-    set(${docker_output} "${run_docker_TAGNAME}" PARENT_SCOPE)
-    set(${docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
+    set(${run_docker_output} "${DOCKER_OUTPUT}" PARENT_SCOPE)
+    set(${run_docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
   else()
     message(FATAL_ERROR "run_docker called without docker executable being present")
+  endif()
+endfunction()
+
+# this function deletes a docker image
+function(delete_docker docker_output docker_result)
+  set(${docker_output} "" PARENT_SCOPE)
+
+  find_program(DOCKER_EXECUTABLE docker)
+  if(DOCKER_EXECUTABLE)
+    set(options "")
+    set(oneValueArgs "FILENAME")
+    set(multiValueArgs "")
+    cmake_parse_arguments(delete_docker "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT delete_docker_FILENAME)
+      message(FATAL_ERROR "error: delete_docker needs FILENAME to be set")
+    endif()
+
+    get_filename_component(TAGNAME ${delete_docker_FILENAME} NAME)
+    string(REPLACE ".dockerfile" "" TAGNAME ${TAGNAME})
+    string(TOLOWER ${TAGNAME} TAGNAME)
+    
+    execute_process(
+      COMMAND ${DOCKER_EXECUTABLE} rmi -f ${TAGNAME}
+      WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
+      OUTPUT_VARIABLE DOCKER_OUTPUT 
+      RESULT_VARIABLE DOCKER_RESULT
+      ERROR_VARIABLE  DOCKER_ERROR
+    )
+
+    set(${delete_docker_output} "${DOCKER_OUTPUT}" PARENT_SCOPE)
+    set(${delete_docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
+  else()
+    message(FATAL_ERROR "delete_docker called without docker executable being present")
   endif()
 endfunction()
 

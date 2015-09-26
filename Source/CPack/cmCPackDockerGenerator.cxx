@@ -270,11 +270,11 @@ int cmCPackDockerGenerator::createDocker()
     out << getLabels();
     out << getFiles();
     out << getVolume();
-    out << getRun("CPACK_DOCKER_RUN_PREDEPENDS");
+    out << getRun("GEN_CPACK_DOCKER_RUN_PREDEPENDS");
     out << getDependencies(packagemanager);
     out << getUser();
     out << getWorkdir();
-    out << getRun("CPACK_DOCKER_RUN_POSTDEPENDS");
+    out << getRun("GEN_CPACK_DOCKER_RUN_POSTDEPENDS");
     out << getOnbuild();
     out << getEntrypoint();
     out << getCmd();
@@ -297,7 +297,13 @@ int cmCPackDockerGenerator::createDocker()
 int cmCPackDockerGenerator::buildDockerContainer()
 {
   // dockerimage
-  std::string output_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  std::string output_name = this->GetOption("CPACK_PACKAGE_DIRECTORY");
+  output_name += "/_CPack_Packages/";
+  output_name += this->GetOption("CPACK_TOPLEVEL_TAG");
+  output_name += "/";
+  output_name += this->GetOption("CPACK_GENERATOR");
+  output_name += "/";
+  output_name += this->GetOption("CPACK_OUTPUT_FILE_NAME");
   // docker policy enforces lower case for container tags
   std::string tag_name = this->GetOption("CPACK_OUTPUT_FILE_NAME");
   std::size_t found = tag_name.rfind(this->GetOutputExtension());
@@ -316,15 +322,15 @@ int cmCPackDockerGenerator::buildDockerContainer()
                                              &output,
                                              &output,
                                              &retval,
-                                             this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                             this->GetOption("CPACK_PACKAGE_DIRECTORY"),
                                              this->GeneratorVerbose,
                                              0);
   if (!res || retval) {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    std::string tmpFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
     tmpFile += "/Docker.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << cmd.str() << std::endl
-        << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
+        << "# Working directory: " << this->GetOption("CPACK_PACKAGE_DIRECTORY") << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
@@ -352,15 +358,15 @@ int cmCPackDockerGenerator::deleteDockerContainer()
                                              &output,
                                              &output,
                                              &retval,
-                                             this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                             this->GetOption("CPACK_PACKAGE_DIRECTORY"),
                                              this->GeneratorVerbose,
                                              0);
   if (!res || retval) {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    std::string tmpFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
     tmpFile += "/Docker.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << cmd.str() << std::endl
-        << "# Working directory: " << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << std::endl
+        << "# Working directory: " << this->GetOption("CPACK_PACKAGE_DIRECTORY") << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running docker command: "
@@ -447,7 +453,7 @@ std::string cmCPackDockerGenerator::getFiles()
 {
   std::stringstream output;
   std::string absolute_dir = this->GetOption("GEN_WDIR");
-  std::string top_level_parent = cmSystemTools::GetParentDirectory(toplevel);
+  std::string top_level_parent = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   std::string relative_dir = absolute_dir.substr(top_level_parent.length()+1, absolute_dir.length());
 
   output << "COPY [ \"" << relative_dir << "\" , \"/\" ]" << std::endl;
@@ -456,7 +462,7 @@ std::string cmCPackDockerGenerator::getFiles()
 
 std::string cmCPackDockerGenerator::getVolume()
 {
-  const char* cstr = this->GetOption("CPACK_DOCKER_VOLUME");
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_VOLUME");
   if(cstr && *cstr) {
     std::vector<std::string> vol_strings;
     cmSystemTools::ExpandListArgument(std::string(cstr), vol_strings);
@@ -475,7 +481,7 @@ std::string cmCPackDockerGenerator::getVolume()
 
 std::string cmCPackDockerGenerator::getExpose()
 {
-  const char* cstr = this->GetOption("CPACK_DOCKER_EXPOSE");
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_EXPOSE");
   if(cstr && *cstr) {
     std::vector<std::string> exp_strings;
     cmSystemTools::ExpandListArgument(std::string(cstr), exp_strings);
@@ -494,7 +500,7 @@ std::string cmCPackDockerGenerator::getExpose()
 
 std::string cmCPackDockerGenerator::getEnv()
 {
-  const char* cstr = this->GetOption("CPACK_DOCKER_ENV");
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_ENV");
   std::stringstream output;
   if(cstr && *cstr) {
     std::vector<std::string> env_strings;
@@ -519,7 +525,7 @@ std::string cmCPackDockerGenerator::getEnv()
 
 std::string cmCPackDockerGenerator::getUser()
 {
-  const char* cstr = this->GetOption("CPACK_DOCKER_USER");
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_USER");
   if(cstr && *cstr) {
     std::string output;
     output = "USER ";
@@ -763,7 +769,7 @@ std::string cmCPackDockerGenerator::getEntrypoint()
 
 std::string cmCPackDockerGenerator::getOnbuild()
 {
-  const char* cstr = this->GetOption("CPACK_DOCKER_ONBUILD");
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_ONBUILD");
   if(cstr && *cstr) {
     std::vector<std::string> onbuild_strings;
     cmSystemTools::ExpandListArgument(std::string(cstr), onbuild_strings);
