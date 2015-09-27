@@ -16,4 +16,4 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 
 # setting variables
 set(CPACK_DOCKER_FROM 							"ubuntu")
-set(CPACK_DOCKER_LABEL 							"distro=${CPACK_DOCKER_FROM}" "test.${CPACK_DOCKER_FROM}.beta")
+set(CPACK_DOCKER_LABEL 							"distro=${CPACK_DOCKER_FROM}" "test.${CPACK_DOCKER_FROM}.beta=true")
