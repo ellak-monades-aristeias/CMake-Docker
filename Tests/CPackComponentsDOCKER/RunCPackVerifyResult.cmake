@@ -71,7 +71,8 @@ endfunction()
 
 # this function runs docker on a .dockerfile and returns its output
 function(run_docker run_docker_output run_docker_result)
-  set(${docker_output} "" PARENT_SCOPE)
+  set(${run_docker_output} "" PARENT_SCOPE)
+  set(${run_docker_result} "" PARENT_SCOPE)
 
   find_program(DOCKER_EXECUTABLE docker)
   if(DOCKER_EXECUTABLE)
@@ -90,15 +91,15 @@ function(run_docker run_docker_output run_docker_result)
     string(TOLOWER ${TAGNAME} TAGNAME)
     
     execute_process(
-      COMMAND ${DOCKER_EXECUTABLE} build --file=${DOCKERFILE} --tag=${TAGNAME} .
+      COMMAND ${DOCKER_EXECUTABLE} build --file=${DOCKERFILE} --tag=${TAGNAME}-${CPackDOCKERConfiguration} .
       WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
       OUTPUT_VARIABLE RUN_DOCKER_OUTPUT 
       RESULT_VARIABLE RUN_DOCKER_RESULT
       ERROR_VARIABLE  RUN_DOCKER_ERROR
     )
 
-    set(${run_docker_output} "DOCKER_OUTPUT:\n${RUN_DOCKER_OUTPUT}\n\nDOCKER_RESULT:\n${RUN_DOCKER_RESULT}\n\nDOCKER_ERROR:\n${RUN_DOCKER_ERROR}" PARENT_SCOPE)
-    set(${run_docker_result} "${DOCKER_RESULT}" PARENT_SCOPE)
+    set(${run_docker_output} "${RUN_DOCKER_OUTPUT}" PARENT_SCOPE)
+    set(${run_docker_result} "${RUN_DOCKER_RESULT}" PARENT_SCOPE)
   else()
     message(FATAL_ERROR "run_docker called without docker executable being present")
   endif()
@@ -106,7 +107,8 @@ endfunction()
 
 # this function deletes a docker image
 function(delete_docker delete_docker_output delete_docker_result)
-  set(${docker_output} "" PARENT_SCOPE)
+  set(${delete_docker_output} "" PARENT_SCOPE)
+  set(${delete_docker_result} "" PARENT_SCOPE)
 
   find_program(DOCKER_EXECUTABLE docker)
   if(DOCKER_EXECUTABLE)
@@ -124,7 +126,7 @@ function(delete_docker delete_docker_output delete_docker_result)
     string(TOLOWER ${TAGNAME} TAGNAME)
     
     execute_process(
-      COMMAND ${DOCKER_EXECUTABLE} rmi -f ${TAGNAME}
+      COMMAND ${DOCKER_EXECUTABLE} rmi -f ${TAGNAME}-${CPackDOCKERConfiguration}
       WORKING_DIRECTORY ${CPackComponentsDOCKER_BINARY_DIR}
       OUTPUT_VARIABLE DEL_DOCKER_OUTPUT 
       RESULT_VARIABLE DEL_DOCKER_RESULT
