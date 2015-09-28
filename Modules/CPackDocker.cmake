@@ -325,7 +325,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# CPack script for creating Debian package
+# CPack script for creating Docker container
 # Author: Aris Synodinos
 #
 # http://docs.docker.com/
@@ -335,7 +335,7 @@ if(CMAKE_BINARY_DIR)
 endif()
 
 if(NOT UNIX)
-  message(FATAL_ERROR "CPackDocker.cmake mif(NOT CPACK_DOCKER_CONTAINER_ay only be used under UNIX.")
+  message(FATAL_ERROR "CPackDocker.cmake may only be used under UNIX.")
 endif()
 
 function(cpack_docker_prepare_package_vars)
