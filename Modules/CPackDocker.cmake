@@ -358,7 +358,7 @@ function(cpack_docker_prepare_package_vars)
     set(CPACK_DOCKER_MAINTAINER ${CPACK_PACKAGE_CONTACT})
   endif()
 
-# Version: (recommended)
+  # Version: (recommended)
   if(NOT CPACK_DOCKER_CONTAINER_VERSION)
     if(NOT CPACK_PACKAGE_VERSION)
       message(STATUS "CPackDocker: Docker recommends a container version")

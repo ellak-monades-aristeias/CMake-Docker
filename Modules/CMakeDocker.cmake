@@ -52,17 +52,25 @@
 # Author: Aris Synodinos
 #
 # http://docs.docker.com/
-
-# Include CPack to introduce the appropriate targets
-include(CPack)
-
-if(CMAKE_BINARY_DIR)
-  message(FATAL_ERROR "CMakeDocker.cmake may only be used by CMake/CPack internally.")
-endif()
+include(CMakeParseArguments)
 
 if(NOT UNIX)
   message(FATAL_ERROR "CMakeDocker.cmake may only be used under UNIX.")
 endif()
+
+# Set the cpack generator
+set(CPACK_GENERATOR DOCKER)
+
+function(CREATE_DOCKERFILE)
+  set(options "")
+  set(oneValueArgs TARGET)
+  set(multiValueArgs "")
+  cmake_parse_arguments(CREATE_DOCKERFILE "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
+  set(CPACK_DOCKER_BUILD_CONTAINER FALSE)
+  set(CPACK_DOCKER_CONTAINER_NAME "${CMAKE_PROJECT_NAME}-${CREATE_DOCKERFILE_TARGET}")
+  set(CPACK_DOCKER_FROM           ${CREATE_DOCKERFILE_TARGET})
+  include(CPack)
+endfunction()
 
 function(CREATE_CONTAINER)
   set(options UPLOAD DELETE)
@@ -133,3 +141,15 @@ function(CREATE_CONTAINER)
   set(${CREATE_CONTAINER_ERROR}  "${BUILD_ERROR};${UPLOAD_ERROR};${DELETE_ERROR}"    PARENT_SCOPE)
 endfunction()
 
+function(CREATE_DEVELOPMENT_DOCKERFILE)
+  set(options "")
+  set(oneValueArgs "")
+  set(multiValueArgs TARGETS)
+  cmake_parse_arguments(CREATE_DEVELOPMENT_DOCKERFILE "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
+
+  foreach(_target ${CREATE_DEVELOPMENT_DOCKERFILE_TARGETS})
+    set(CPACK_DOCKER_VOLUME "/home/${_target}")
+    set(CPACK_DOCKER_WORKDIR "/home/${_target}")
+    CREATE_DOCKERFILE(TARGET ${_target})
+  endforeach()
+endfunction()
