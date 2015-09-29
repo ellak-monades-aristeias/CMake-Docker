@@ -61,6 +61,25 @@ endif()
 # Set the cpack generator
 set(CPACK_GENERATOR DOCKER)
 
+# file(GLOB PACKAGE_FILES "*")
+# file(GLOB BINARY_FILES  "${CMAKE_BINARY_DIR}")
+# foreach(FILE ${BINARY_FILES})
+#   list(REMOVE_ITEM PACKAGE_FILES ${FILE})
+# endforeach()
+
+# install(FILES ${PACKAGE_FILES}
+#         DESTINATION ${CMAKE_PROJECT_NAME}
+#         COMPONENT package_files)
+message(STATUS "Binary Dir is: ${CMAKE_BINARY_DIR}")
+set(CMAKE_INSTALL_PREFIX "/")
+install(DIRECTORY ${CMAKE_SOURCE_DIR}
+        DESTINATION ${PROJECT_NAME}
+        COMPONENT package_files
+        PATTERN "build*" EXCLUDE)
+
+set(CPACK_COMPONENTS_ALL package_files)
+set(CPACK_DOCKER_COMPONENT_INSTALL "ON")
+
 function(CREATE_DOCKERFILE)
   set(options "")
   set(oneValueArgs TARGET)
@@ -68,7 +87,7 @@ function(CREATE_DOCKERFILE)
   cmake_parse_arguments(CREATE_DOCKERFILE "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
   set(CPACK_DOCKER_BUILD_CONTAINER FALSE)
   set(CPACK_DOCKER_CONTAINER_NAME "${CMAKE_PROJECT_NAME}-${CREATE_DOCKERFILE_TARGET}")
-  set(CPACK_DOCKER_FROM           ${CREATE_DOCKERFILE_TARGET})
+  set(CPACK_DOCKER_FROM ${CREATE_DOCKERFILE_TARGET})
   include(CPack)
 endfunction()
 
