@@ -52,6 +52,10 @@
 # Author: Aris Synodinos
 #
 # http://docs.docker.com/
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR "In-source builds are not permitted. Make a separate folder for building:\nmkdir build; cd build; cmake ..\nBefore that, remove the files already created:\nrm -rf CMakeCache.txt CMakeFiles")
+endif()
+
 include(CMakeParseArguments)
 
 if(NOT UNIX)
@@ -60,22 +64,11 @@ endif()
 
 # Set the cpack generator
 set(CPACK_GENERATOR DOCKER)
-
-# file(GLOB PACKAGE_FILES "*")
-# file(GLOB BINARY_FILES  "${CMAKE_BINARY_DIR}")
-# foreach(FILE ${BINARY_FILES})
-#   list(REMOVE_ITEM PACKAGE_FILES ${FILE})
-# endforeach()
-
-# install(FILES ${PACKAGE_FILES}
-#         DESTINATION ${CMAKE_PROJECT_NAME}
-#         COMPONENT package_files)
-message(STATUS "Binary Dir is: ${CMAKE_BINARY_DIR}")
-set(CMAKE_INSTALL_PREFIX "/")
+string(REPLACE "${CMAKE_SOURCE_DIR}/" "" RELATIVE_DIR ${CMAKE_BINARY_DIR})
 install(DIRECTORY ${CMAKE_SOURCE_DIR}
         DESTINATION ${PROJECT_NAME}
         COMPONENT package_files
-        PATTERN "build*" EXCLUDE)
+        PATTERN "${RELATIVE_DIR}*" EXCLUDE)
 
 set(CPACK_COMPONENTS_ALL package_files)
 set(CPACK_DOCKER_COMPONENT_INSTALL "ON")
