@@ -40,6 +40,4 @@ install(FILES mylib.h
         COMPONENT headers)
 
 include(CMakeDocker)
-create_development_dockerfile(
-  TARGETS "ubuntu" "centos" "fedora" "base/archlinux"
-)
+create_dockerfile(TARGET "ubuntu")

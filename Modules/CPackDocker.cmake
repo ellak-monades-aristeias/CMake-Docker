@@ -24,6 +24,7 @@
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_DOCKER_CONTAINER_NAME
+#               CPACK_DOCKER_CONTAINER_COMPONENT_<COMPONENT>_NAME
 #
 #  The Docker container name
 #
@@ -424,13 +425,16 @@ function(cpack_docker_prepare_package_vars)
     endif()
   endif()
 
-  if(CPACK_DOCKER_CONTAINER_COMPONENT)
-    set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "-${CPACK_DOCKER_CONTAINER_COMPONENT}")
-    string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME}" CPACK_DOCKER_CONTAINER_NAME)
+  if(NOT CPACK_DOCKER_CONTAINER_COMPONENT_${_local_component_name}_NAME)
+    if(CPACK_DOCKER_CONTAINER_COMPONENT)
+      set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "-${CPACK_DOCKER_CONTAINER_COMPONENT}")
+      string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME}" CPACK_DOCKER_CONTAINER_NAME)
+    else()
+      set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "")
+    endif()
   else()
-    set(CPACK_DOCKER_CONTAINER_COMPONENT_PART_NAME "")
+    string(TOLOWER "${CPACK_DOCKER_CONTAINER_COMPONENT_${_local_component_name}_NAME}" CPACK_DOCKER_CONTAINER_NAME)
   endif()
-
 
   # Print out some debug information if we were asked for that
   if(CPACK_DOCKER_PACKAGE_DEBUG)
@@ -462,7 +466,7 @@ function(cpack_docker_prepare_package_vars)
   set(GEN_CPACK_DOCKER_EXPOSE                   "${CPACK_DOCKER_EXPOSE}"                  PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ENV                      "${CPACK_DOCKER_ENV}"                     PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ENTRYPOINT               "${CPACK_DOCKER_ENTRYPOINT}"              PARENT_SCOPE)
-  set(GEN_CPACK_DOKCER_VOLUME                   "${CPACK_DOCKER_VOLUME}"                  PARENT_SCOPE)
+  set(GEN_CPACK_DOCKER_VOLUME                   "${CPACK_DOCKER_VOLUME}"                  PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_USER                     "${CPACK_DOCKER_USER}"                    PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_WORKDIR                  "${CPACK_DOCKER_WORKDIR}"                 PARENT_SCOPE)
   set(GEN_CPACK_DOCKER_ONBUILD                  "${CPACK_DOCKER_ONBUILD}"                 PARENT_SCOPE)

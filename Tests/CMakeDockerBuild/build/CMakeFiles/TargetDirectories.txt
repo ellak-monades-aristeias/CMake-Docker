@@ -1,0 +1,3 @@
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/build/CMakeFiles/mylibapp2.dir
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/build/CMakeFiles/mylib.dir
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/build/CMakeFiles/mylibapp.dir

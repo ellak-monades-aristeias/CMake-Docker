@@ -1,0 +1,6 @@
+//CMakeDockerBuild/folder/in_file.h
+//CMakeDockerBuild/license.txt
+//CMakeDockerBuild/mylib.h
+//CMakeDockerBuild/CMakeLists.txt
+//CMakeDockerBuild/mylib.cpp
+//CMakeDockerBuild/mylibapp.cpp

@@ -268,8 +268,8 @@ int cmCPackDockerGenerator::createDocker()
     out << "MAINTAINER " << maintainer << std::endl;
     out << getEnv();
     out << getLabels();
-    out << getFiles();
     out << getVolume();
+    out << getFiles();
     out << getRun("GEN_CPACK_DOCKER_RUN_PREDEPENDS");
     out << getDependencies(packagemanager);
     out << getUser();
@@ -455,8 +455,12 @@ std::string cmCPackDockerGenerator::getFiles()
   std::string absolute_dir = this->GetOption("GEN_WDIR");
   std::string top_level_parent = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   std::string relative_dir = absolute_dir.substr(top_level_parent.length()+1, absolute_dir.length());
-
-  output << "COPY [ \"" << relative_dir << "\" , \"/\" ]" << std::endl;
+  const char* cstr = this->GetOption("GEN_CPACK_DOCKER_WORKDIR");
+  if(cstr && *cstr) {
+    output << "COPY [ \"" << relative_dir << "\" , \"" << cstr << "\" ]" << std::endl;
+  } else {
+    output << "COPY [ \"" << relative_dir << "\" , \"/\" ]" << std::endl;
+  }
   return output.str();
 }
 
@@ -476,7 +480,7 @@ std::string cmCPackDockerGenerator::getVolume()
     output << "]" << std::endl;
     return output.str();
   }
-  return std::string();
+  return std::string("");
 }
 
 std::string cmCPackDockerGenerator::getExpose()

@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/mylibapp2.dir/mylibapp.cpp.o  -o mylibapp2 -rdynamic -Wl,-Bdynamic libmylib.a 

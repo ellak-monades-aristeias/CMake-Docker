@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/mylib.cpp
+mylib.h
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/mylib.h
+stdio.h
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/stdio.h
+
+/home/aris/source/cpp/CMake-Docker/Tests/CMakeDockerBuild/mylib.h
+
