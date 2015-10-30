@@ -1,4 +1,5 @@
 # Docker Integration in CMake/CPack
+[![License](http://img.shields.io/badge/License-CC BY--SA 4.0-blue.svg)](https://github.com/ellak-monades-aristeias/CMake-Docker/blob/cpack-docker/LICENSE.md)
 
 ## Introduction
 
