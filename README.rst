@@ -1,99 +1,52 @@
-CMake
-*****
+Docker Integration in CMake/CPack
+*********************************
 
 Introduction
 ============
 
-CMake is a cross-platform, open-source build system generator.
-For full documentation visit the `CMake Home Page`_ and the
-`CMake Documentation Page`_.
+[CMake](http://www.cmake.org/) is the most popular open source build tool. It provides the ability to compile source code in a common way on different operating systems, linking dependencies and libraries in an agnostic way to the system and the compiler. Its widespread in the open source community is anything but random/lucky, as it has provided the developers with the ability to address the growing software unified across all platforms (POSIX-compliant, Windows, and OSX). Through modules, CMake provides usability that exceeds the limits of a simple build tool, such as project packaging ([CPack](http://www.cmake.org/Wiki/CMake:Packaging_With_CPack)), easy unit testing, code quality and coverage tools, etc.
 
-.. _`CMake Home Page`: http://www.cmake.org
-.. _`CMake Documentation Page`: http://www.cmake.org/cmake/help/documentation.html
+[Docker](https://www.docker.com/) allows you to package an application with all of its dependencies into a standardized unit for software development. Docker containers wrap up a piece of software in a complete filesystem that contains everything it needs to run: code, runtime, system tools, system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is running in. At first sight, Docker appears to have many similarities with Virtual Machines, but internally works completely different and does not have many of the disadvantages they have. So far, Docker has been successfully applied in horizontal scaling systems and cloud services. Also, Continuous Integration and Continuous Deployment services have begun to use Docker in place of Virtual Machines.
 
-CMake is maintained and supported by `Kitware`_ and developed in
-collaboration with a productive community of contributors.
+Featured Project
+================
 
-.. _`Kitware`: http://www.kitware.com/cmake
+[CPack](http://www.cmake.org/Wiki/CMake:Packaging_With_CPack) is one of CMake's modules, that can also work independently, and provides automatic project packaging capabilities in several different package templates. Until this day, CPack provides packaging capabilities for deb packages (debian-based systems), rpm packages (redhat-based systems), simple zip/tar/gz/bz compressed packages and setup files for Windows/OSX. Goal of this project is the integration of Docker in CMake and CPack, initially as new packaging method, and then as a method to change the workflow of the programmer.
 
-License
-=======
+* Docker integration in CPack for instant project packaging.
+* Docker integration in CMake for project compiling and checking.
+	* Automated compilation in different versions and different distributions.
+	* Proper project dependencies check.
+	* Automated native package building with proper dependencies checking and linking without the need of virtual machines.
+	* Easy horizontal scaling and installation on multiple systems.
 
-CMake is distributed under the OSI-approved BSD 3-clause License.
-See `Copyright.txt`_ for details.
+Timetable
+---------
 
-.. _`Copyright.txt`: Copyright.txt
+| Dates     	| Duration | Description 																		                            |
+|---------------|----------|----------------------------------------------------------------------------------------------------------------|
+| 24/08 - 28/08 | 1 Week   | Feedback from CMake developers community - collecting information regarding usability and development method.  |
+| 31/08 - 11/09 | 2 Weeks  | Development of CPack Module.																					|
+| 14/09 - 02/10 | 3 Weeks  | Development of CMake Module.											 										|
+| 05/09 - 09/10 | 1 Week   | Code checking and Unit Testing.																				| 
+| 12/10 - 15/10 | 1 Week   | Documentation and Tutorials.																					| 
 
-Building CMake
-==============
+Deliverables
+------------
 
-Supported Platforms
--------------------
+| Deliverable Title 											| Url 						|
+|---------------------------------------------------------------|---------------------------|
+| Technical report with the answers of developers and work plan.| [google form](https://docs.google.com/forms/d/1zbpWB7Z7Qf7geovARlJWcFFZwVYub9BgpjvQGsdJK38/viewanalytics), [github wiki](https://github.com/ellak-monades-aristeias/CMake-Docker/wiki/Questionnaire-Results) |
+| CPack Software Module.										| [cmCPackDockerGenerator.cxx](https://github.com/ellak-monades-aristeias/CMake-Docker/blob/cpack-docker/Source/CPack/cmCPackDockerGenerator.cxx), [cmCPackDockerGenerator.h](https://github.com/ellak-monades-aristeias/CMake-Docker/blob/cpack-docker/Source/CPack/cmCPackDockerGenerator.h), [CPackDocker.cmake](https://github.com/ellak-monades-aristeias/CMake-Docker/blob/cpack-docker/Modules/CPackDocker.cmake) |
+| CMake Software Module.										| [CMakeDocker.cmake](https://github.com/ellak-monades-aristeias/CMake-Docker/blob/cpack-docker/Modules/CMakeDocker.cmake)|
+| Documentation/tutorials with code samples.					| [CPackComponentsDOCKER](https://github.com/ellak-monades-aristeias/CMake-Docker/tree/cpack-docker/Tests/CPackComponentsDOCKER), [CMakeDockerCreate](https://github.com/ellak-monades-aristeias/CMake-Docker/tree/cpack-docker/Tests/CMakeDockerCreate), [CMakeDockerBuild](https://github.com/ellak-monades-aristeias/CMake-Docker/tree/cpack-docker/Tests/CMakeDockerBuild) |
 
-MS Windows, Mac OS X, Linux, FreeBSD, Solaris, HP-UX, IRIX, BeOS, QNX
+Usability
+=========
 
-Other UNIX-like operating systems may work too out of the box, if not
-it should not be a major problem to port CMake to this platform.
-Subscribe and post to the `CMake Users List`_ to ask if others have
-had experience with the platform.
+This project is expected to have great usability in the field of software development. It should significantly influence the community of software maintainers (Package Maintainers) and the software development community (Software Developers). Specifically small development teams will be able to provide packages for all distributions and operating systems easily and to test their software without having to maintain many virtual systems.
 
-.. _`CMake Users List`: http://www.cmake.org/mailman/listinfo/cmake
+Promotion
+=========
 
-Building CMake from Scratch
----------------------------
-
-UNIX/Mac OSX/MinGW/MSYS/Cygwin
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You need to have a compiler and a make installed.
-Run the ``bootstrap`` script you find the in the source directory of CMake.
-You can use the ``--help`` option to see the supported options.
-You may use the ``--prefix=<install_prefix>`` option to specify a custom
-installation directory for CMake. You can run the ``bootstrap`` script from
-within the CMake source directory or any other build directory of your
-choice. Once this has finished successfully, run ``make`` and
-``make install``.  In summary::
-
- $ ./bootstrap && make && make install
-
-Windows
-^^^^^^^
-
-You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from the `CMake Download Page`_ .  Then
-proceed with the instructions below.
-
-.. _`CMake Download Page`: http://www.cmake.org/cmake/resources/software.html
-
-Building CMake with CMake
--------------------------
-
-You can build CMake as any other project with a CMake-based build system:
-run the installed CMake on the sources of this CMake with your preferred
-options and generators. Then build it and install it.
-For instructions how to do this, see documentation on `Running CMake`_.
-
-.. _`Running CMake`: http://www.cmake.org/cmake/help/runningcmake.html
-
-Reporting Bugs
-==============
-
-If you have found a bug:
-
-1. If you have a patch, please read the `CONTRIBUTING.rst`_ document.
-
-2. Otherwise, please join the `CMake Users List`_ and ask about
-   the expected and observed behaviors to determine if it is really
-   a bug.
-
-3. Finally, if the issue is not resolved by the above steps, open
-   an entry in the `CMake Issue Tracker`_.
-
-.. _`CMake Issue Tracker`: http://www.cmake.org/Bug
-
-Contributing
-============
-
-See `CONTRIBUTING.rst`_ for instructions to contribute.
-
-.. _`CONTRIBUTING.rst`: CONTRIBUTING.rst
+The initial promotion step will be contacting the developers of CMake and other big programming communities. Then the project will spread to the open source community through the integration in the official program (either as a standalone plugin or officially supported), and also through documentation and tutorials with code snippets allowing quick learning and easy usage.
